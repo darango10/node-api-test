@@ -1,13 +1,13 @@
 import { Portfolio } from '../../domain/entities/portfolio';
 import { ValidationError } from '../../domain/errors';
-import { PortfolioRepository } from '../../ports/repositories/portfolio-repository.port';
+import { PortfolioRepositoryPort } from '../../ports/repositories/portfolio-repository.port';
 
 /**
  * GetPortfolio use case
  * Retrieves a user's portfolio by their userId
  */
 export class GetPortfolio {
-  constructor(private readonly portfolioRepository: PortfolioRepository) {}
+  constructor(private readonly portfolioRepository: PortfolioRepositoryPort) {}
 
   async execute(userId: string): Promise<Portfolio | null> {
     // Validate input

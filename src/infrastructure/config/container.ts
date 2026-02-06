@@ -3,7 +3,7 @@ import { StockVendorAdapter } from '../external/stock-vendor.adapter';
 import { StockVendorPort } from '../../ports/services/stock-vendor.port';
 import { ListStocks } from '../../application/use-cases/list-stocks';
 import { PortfolioRepositoryImpl } from '../persistence/portfolio.repository';
-import { PortfolioRepository } from '../../ports/repositories/portfolio-repository.port';
+import { PortfolioRepositoryPort } from '../../ports/repositories/portfolio-repository.port';
 import { GetPortfolio } from '../../application/use-cases/get-portfolio';
 
 /**
@@ -14,7 +14,7 @@ import { GetPortfolio } from '../../application/use-cases/get-portfolio';
 
 export interface Container {
   stockVendorPort: StockVendorPort;
-  portfolioRepository: PortfolioRepository;
+  portfolioRepository: PortfolioRepositoryPort;
   listStocksUseCase: ListStocks;
   getPortfolioUseCase: GetPortfolio;
 }

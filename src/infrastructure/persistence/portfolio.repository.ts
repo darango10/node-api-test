@@ -1,12 +1,12 @@
 import { Portfolio, Position } from '../../domain/entities/portfolio';
-import { PortfolioRepository } from '../../ports/repositories/portfolio-repository.port';
+import { PortfolioRepositoryPort } from '../../ports/repositories/portfolio-repository.port';
 import { ValidationError } from '../../domain/errors';
 import { PortfolioModel } from './models/portfolio.model';
 
 /**
  * MongoDB implementation of PortfolioRepository using Mongoose
  */
-export class PortfolioRepositoryImpl implements PortfolioRepository {
+export class PortfolioRepositoryImpl implements PortfolioRepositoryPort {
   /**
    * Get portfolio by userId
    */

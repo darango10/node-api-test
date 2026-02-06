@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GetPortfolio } from '../../../src/application/use-cases/get-portfolio';
-import { PortfolioRepository } from '../../../src/ports/repositories/portfolio-repository.port';
+import { PortfolioRepositoryPort } from '../../../src/ports/repositories/portfolio-repository.port';
 import { Portfolio, Position } from '../../../src/domain/entities/portfolio';
 
 describe('GetPortfolio Use Case', () => {
   let getPortfolio: GetPortfolio;
-  let mockPortfolioRepository: PortfolioRepository;
+  let mockPortfolioRepository: PortfolioRepositoryPort;
 
   beforeEach(() => {
     mockPortfolioRepository = {
