@@ -46,28 +46,53 @@ description: "Task list template for feature implementation"
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Project initialization and basic structure
+**Purpose**: Project initialization and basic structure following constitution
 
-- [ ] T001 Create project structure per implementation plan
-- [ ] T002 Initialize [language] project with [framework] dependencies
-- [ ] T003 [P] Configure linting and formatting tools
+- [ ] T001 Create hexagonal architecture structure (domain, application, infrastructure, ports)
+- [ ] T002 Initialize Node.js project with TypeScript and essential dependencies
+- [ ] T003 [P] Configure ESLint with security plugins (eslint-plugin-security, eslint-plugin-node)
+- [ ] T004 [P] Configure Prettier for code formatting
+- [ ] T005 [P] Setup testing framework (Jest/Vitest) with coverage reporting
+- [ ] T006 [P] Configure Git hooks (husky) for pre-commit linting and tests
+- [ ] T007 Setup dependency injection container (tsyringe/awilix) for clean DI
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
+**Purpose**: Core infrastructure following constitution principles
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-Examples of foundational tasks (adjust based on your project):
+**Error Handling (Constitution Principle V)**:
+- [ ] T010 Create custom error classes extending built-in Error (AppError, DomainError, ValidationError)
+- [ ] T011 Implement centralized error handler middleware
+- [ ] T012 Register global handlers for unhandledRejection and uncaughtException
 
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
-- [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
+**Logging & Observability (Constitution Principle VI)**:
+- [ ] T013 [P] Setup structured logging with pino/winston (log to stdout)
+- [ ] T014 [P] Implement AsyncLocalStorage for request correlation IDs
+- [ ] T015 [P] Create /health endpoint (liveness + readiness checks)
+- [ ] T016 [P] Create /metrics endpoint (Prometheus format)
+
+**Security (Constitution Principle VII)**:
+- [ ] T017 [P] Setup helmet middleware for secure HTTP headers
+- [ ] T018 [P] Implement rate limiting middleware (express-rate-limit)
+- [ ] T019 [P] Setup input validation middleware (joi/zod)
+- [ ] T020 [P] Configure CORS properly (no wildcard in production)
+
+**Configuration & Environment**:
+- [ ] T021 Setup environment-aware config with validation (convict/env-var/zod)
+- [ ] T022 Implement graceful shutdown handlers (SIGTERM, SIGINT)
+
+**Port Definitions (Hexagonal Architecture)**:
+- [ ] T023 [P] Define repository port interfaces in src/ports/repositories/
+- [ ] T024 [P] Define external service port interfaces in src/ports/services/
+
+**Infrastructure Setup** (if database/external services needed):
+- [ ] T025 Setup database connection with connection pooling
+- [ ] T026 Implement repository adapters in src/infrastructure/persistence/
+- [ ] T027 Setup migrations framework (TypeORM/Prisma migrations)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -79,21 +104,52 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (MANDATORY per Constitution) ⚠️
 
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+> **CRITICAL (Constitution Principle IV - TDD)**: Write these tests FIRST, ensure they FAIL before implementation
+> Follow testing pyramid: 70% unit, 20% integration, 5% contract, 5% e2e
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+**Unit Tests (Domain & Application Layer)**:
+- [ ] T030 [P] [US1] Unit test for [Entity] business logic in tests/unit/domain/test-[entity].spec.ts
+- [ ] T031 [P] [US1] Unit test for [DomainService] in tests/unit/domain/test-[service].spec.ts  
+- [ ] T032 [P] [US1] Unit test for [UseCase] application service in tests/unit/application/test-[use-case].spec.ts
 
-### Implementation for User Story 1
+**Integration Tests (Infrastructure Layer)**:
+- [ ] T033 [P] [US1] Integration test for [Repository] with real DB in tests/integration/test-[repository].spec.ts
+- [ ] T034 [P] [US1] Integration test for [ExternalService] adapter in tests/integration/test-[service].spec.ts
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+**Contract Tests (API)**:
+- [ ] T035 [US1] Contract test for [POST/GET /endpoint] in tests/contract/test-[endpoint].spec.ts
+
+**E2E Tests (Critical User Journey Only)**:
+- [ ] T036 [US1] E2E test for [critical user journey] in tests/e2e/test-[journey].spec.ts
+
+### Implementation for User Story 1 (After Tests Are Written & Failing)
+
+> **Hexagonal Architecture Enforcement**: Follow layer order - Domain → Application → Infrastructure
+
+**Domain Layer (Pure Business Logic - NO external dependencies)**:
+- [ ] T040 [P] [US1] Create [Entity1] in src/domain/entities/[entity1].ts
+- [ ] T041 [P] [US1] Create [Entity2] in src/domain/entities/[entity2].ts
+- [ ] T042 [US1] Implement [DomainService] in src/domain/services/[service].ts
+- [ ] T043 [US1] Create domain-specific errors in src/domain/errors/[error].ts
+
+**Application Layer (Use Cases - Orchestrates Domain Logic)**:
+- [ ] T044 [US1] Define [Repository] port interface in src/ports/repositories/[repository].port.ts
+- [ ] T045 [US1] Implement [UseCase] in src/application/use-cases/[use-case].ts
+
+**Infrastructure Layer (Adapters for External Concerns)**:
+- [ ] T046 [US1] Implement [Repository] adapter in src/infrastructure/persistence/[repository].ts
+- [ ] T047 [US1] Create [Controller] in src/infrastructure/http/controllers/[controller].ts
+- [ ] T048 [US1] Define routes in src/infrastructure/http/routes/[feature].routes.ts
+- [ ] T049 [US1] Add input validation middleware for endpoints (use joi/zod schemas)
+- [ ] T050 [US1] Add error handling for user story 1 operations (operational errors)
+- [ ] T051 [US1] Add structured logging with correlation IDs for user story 1
+
+**Verification**:
+- [ ] T052 [US1] Run all tests - verify ≥80% coverage for user story 1 code
+- [ ] T053 [US1] Run ESLint - verify no security/style violations
+- [ ] T054 [US1] Verify SOLID principles compliance in code review
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -148,14 +204,53 @@ Examples of foundational tasks (adjust based on your project):
 
 ## Phase N: Polish & Cross-Cutting Concerns
 
-**Purpose**: Improvements that affect multiple user stories
+**Purpose**: Constitution compliance verification and final improvements
 
-- [ ] TXXX [P] Documentation updates in docs/
-- [ ] TXXX Code cleanup and refactoring
-- [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
-- [ ] TXXX Security hardening
-- [ ] TXXX Run quickstart.md validation
+**Constitution Compliance Audit**:
+- [ ] TXXX Verify hexagonal architecture adherence (no business logic in controllers)
+- [ ] TXXX Verify SOLID principles across all code
+- [ ] TXXX Verify test coverage ≥ 80% overall
+- [ ] TXXX Verify all functions ≤ 20 lines (or justified exceptions documented)
+- [ ] TXXX Verify all files ≤ 200 lines (or justified exceptions documented)
+- [ ] TXXX Verify naming conventions followed throughout
+
+**Security Final Checks**:
+- [ ] TXXX [P] Run npm audit and resolve all high/critical vulnerabilities
+- [ ] TXXX [P] Run snyk test for additional vulnerability scanning
+- [ ] TXXX [P] Verify no secrets in code (use git-secrets or similar)
+- [ ] TXXX [P] Verify rate limiting on all endpoints
+- [ ] TXXX [P] Verify input validation on all endpoints
+
+**Production Readiness**:
+- [ ] TXXX [P] Verify /health endpoint returns proper status
+- [ ] TXXX [P] Verify /metrics endpoint exposes key metrics
+- [ ] TXXX [P] Verify graceful shutdown works (test SIGTERM handling)
+- [ ] TXXX [P] Verify structured logging includes correlation IDs
+- [ ] TXXX [P] Verify error responses don't leak sensitive info
+
+**Performance & Optimization**:
+- [ ] TXXX Profile critical paths (identify bottlenecks)
+- [ ] TXXX Optimize database queries (add indexes if needed)
+- [ ] TXXX Verify event loop not blocked (no synchronous CPU-heavy operations)
+
+**Documentation**:
+- [ ] TXXX [P] Update README with project structure and architecture overview
+- [ ] TXXX [P] Document API endpoints (OpenAPI/Swagger)
+- [ ] TXXX [P] Create quickstart.md for local development setup
+- [ ] TXXX [P] Document environment variables and configuration
+
+**Docker (if applicable)**:
+- [ ] TXXX Create multi-stage Dockerfile following best practices
+- [ ] TXXX Add .dockerignore to prevent secrets leakage
+- [ ] TXXX Use non-root USER in Dockerfile
+- [ ] TXXX Scan Docker image for vulnerabilities (docker scan or trivy)
+- [ ] TXXX Lint Dockerfile with hadolint
+
+**Final Verification**:
+- [ ] TXXX Run full test suite (unit, integration, contract, e2e)
+- [ ] TXXX Run ESLint with --max-warnings 0
+- [ ] TXXX Verify npm ci works (clean install from lockfile)
+- [ ] TXXX Run quickstart.md validation (ensure setup instructions work)
 
 ---
 

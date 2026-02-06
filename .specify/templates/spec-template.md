@@ -80,6 +80,9 @@
 <!--
   ACTION REQUIRED: The content in this section represents placeholders.
   Fill them out with the right functional requirements.
+  
+  IMPORTANT: All requirements must be implementable following hexagonal architecture
+  and Node.js best practices (see constitution).
 -->
 
 ### Functional Requirements
@@ -94,6 +97,36 @@
 
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+
+### Non-Functional Requirements (from Constitution)
+
+**Architecture**:
+- **NFR-001**: Implementation MUST follow hexagonal architecture (domain, application, infrastructure layers)
+- **NFR-002**: Business logic MUST reside in domain layer with ZERO external dependencies
+- **NFR-003**: All external dependencies MUST be accessed through ports (interfaces)
+
+**Code Quality**:
+- **NFR-004**: All code MUST adhere to SOLID principles
+- **NFR-005**: Functions MUST NOT exceed 20 lines (unless justified)
+- **NFR-006**: Files MUST NOT exceed 200 lines (unless justified)
+- **NFR-007**: Code MUST pass ESLint with security plugins
+
+**Testing**:
+- **NFR-008**: Test coverage MUST be ≥ 80%
+- **NFR-009**: Tests MUST be written before implementation (TDD)
+- **NFR-010**: Tests MUST follow testing pyramid (70% unit, 20% integration, 5% contract, 5% e2e)
+
+**Security**:
+- **NFR-011**: All inputs MUST be validated with schemas (joi/zod/ajv)
+- **NFR-012**: All endpoints MUST have rate limiting
+- **NFR-013**: Passwords MUST be hashed with bcrypt/scrypt
+- **NFR-014**: No secrets in code (use environment variables)
+
+**Production Readiness**:
+- **NFR-015**: System MUST expose `/health` and `/metrics` endpoints
+- **NFR-016**: System MUST log to stdout with structured JSON format
+- **NFR-017**: System MUST handle graceful shutdown (SIGTERM, SIGINT)
+- **NFR-018**: System MUST distinguish operational vs. programmer errors
 
 ### Key Entities *(include if feature involves data)*
 
