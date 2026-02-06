@@ -124,32 +124,32 @@
 ### Tests for User Story 2
 
 **Unit**:
-- [ ] T044 [P] [US2] Unit test GetPortfolio use case with mocked PortfolioRepository in tests/unit/application/get-portfolio.spec.ts
-- [ ] T045 [P] [US2] Unit test Portfolio/Position entities in tests/unit/domain/portfolio.spec.ts
+- [X] T044 [P] [US2] Unit test GetPortfolio use case with mocked PortfolioRepository in tests/unit/application/get-portfolio.spec.ts
+- [X] T045 [P] [US2] Unit test Portfolio/Position entities in tests/unit/domain/portfolio.spec.ts
 
 **Integration**:
-- [ ] T046 [P] [US2] Integration test PortfolioRepository Mongoose adapter with test DB in tests/integration/portfolio-repository.spec.ts
+- [X] T046 [P] [US2] Integration test PortfolioRepository Mongoose adapter with test DB in tests/integration/portfolio-repository.spec.ts
 
 **Contract**:
-- [ ] T047 [US2] Contract test GET /users/:userId/portfolio (200, 400, 404) in tests/contract/portfolio.spec.ts
+- [X] T047 [US2] Contract test GET /users/:userId/portfolio (200, 400, 404) in tests/contract/portfolio.spec.ts
 
 ### Implementation for User Story 2
 
 **Domain**:
-- [ ] T048 [P] [US2] Create Portfolio and Position value types in src/domain/entities/portfolio.ts
+- [X] T048 [P] [US2] Create Portfolio and Position value types in src/domain/entities/portfolio.ts
 
 **Application**:
-- [ ] T049 [US2] Implement GetPortfolio use case in src/application/use-cases/get-portfolio.ts (depends on PortfolioRepository)
-- [ ] T050 [US2] Wire GetPortfolio and PortfolioRepository in container
+- [X] T049 [US2] Implement GetPortfolio use case in src/application/use-cases/get-portfolio.ts (depends on PortfolioRepository)
+- [X] T050 [US2] Wire GetPortfolio and PortfolioRepository in container
 
 **Infrastructure**:
-- [ ] T051 [US2] Create Mongoose schema and model for Portfolio in src/infrastructure/persistence/models/portfolio.model.ts (userId, positions[], updatedAt)
-- [ ] T052 [US2] Implement PortfolioRepository adapter in src/infrastructure/persistence/portfolio.repository.ts (getByUserId, upsertPosition with atomic update)
-- [ ] T053 [US2] Create portfolio controller in src/infrastructure/http/controllers/portfolio.controller.ts
-- [ ] T054 [US2] Define GET /users/:userId/portfolio route and userId validation in src/infrastructure/http/routes/portfolio.routes.ts
+- [X] T051 [US2] Create Mongoose schema and model for Portfolio in src/infrastructure/persistence/models/portfolio.model.ts (userId, positions[], updatedAt)
+- [X] T052 [US2] Implement PortfolioRepository adapter in src/infrastructure/persistence/portfolio.repository.ts (getByUserId, upsertPosition with atomic update)
+- [X] T053 [US2] Create portfolio controller in src/infrastructure/http/controllers/portfolio.controller.ts
+- [X] T054 [US2] Define GET /users/:userId/portfolio route and userId validation in src/infrastructure/http/routes/portfolio.routes.ts
 
 **Verification**:
-- [ ] T055 [US2] Run US2 tests and lint
+- [X] T055 [US2] Run US2 tests and lint
 
 **Checkpoint**: Get portfolio works; list stocks + get portfolio can be demoed together.
 

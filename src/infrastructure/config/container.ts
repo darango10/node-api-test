@@ -2,6 +2,9 @@ import { getConfig } from './index';
 import { StockVendorAdapter } from '../external/stock-vendor.adapter';
 import { StockVendorPort } from '../../ports/services/stock-vendor.port';
 import { ListStocks } from '../../application/use-cases/list-stocks';
+import { PortfolioRepositoryImpl } from '../persistence/portfolio.repository';
+import { PortfolioRepository } from '../../ports/repositories/portfolio-repository.port';
+import { GetPortfolio } from '../../application/use-cases/get-portfolio';
 
 /**
  * Dependency injection container / factory for ports.
@@ -11,7 +14,9 @@ import { ListStocks } from '../../application/use-cases/list-stocks';
 
 export interface Container {
   stockVendorPort: StockVendorPort;
+  portfolioRepository: PortfolioRepository;
   listStocksUseCase: ListStocks;
+  getPortfolioUseCase: GetPortfolio;
 }
 
 /**
@@ -28,11 +33,16 @@ export function createContainer(): Container {
     5000 // 5 second timeout
   );
 
+  const portfolioRepository = new PortfolioRepositoryImpl();
+
   // Application use cases
   const listStocksUseCase = new ListStocks(stockVendorPort);
+  const getPortfolioUseCase = new GetPortfolio(portfolioRepository);
 
   return {
     stockVendorPort,
+    portfolioRepository,
     listStocksUseCase,
+    getPortfolioUseCase,
   };
 }

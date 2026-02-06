@@ -10,6 +10,8 @@ import { generalRateLimiter } from './middlewares/rate-limit.js';
 import healthRoutes from './routes/health.routes.js';
 import metricsRoutes from './routes/metrics.routes.js';
 import { createStocksRouter } from './routes/stocks.routes';
+import { createPortfolioRoutes } from './routes/portfolio.routes';
+import { PortfolioController } from './controllers/portfolio.controller';
 import { createContainer } from '../config/container';
 
 export const createApp = (): Express => {
@@ -62,8 +64,12 @@ export const createApp = (): Express => {
   // Create dependency injection container
   const container = createContainer();
 
+  // Controllers
+  const portfolioController = new PortfolioController(container.getPortfolioUseCase);
+
   // API routes
   app.use('/stocks', createStocksRouter(container.listStocksUseCase));
+  app.use(createPortfolioRoutes(portfolioController));
 
   // Error handler must be last
   app.use(errorHandler);
