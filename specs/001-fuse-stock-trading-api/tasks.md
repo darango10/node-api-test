@@ -80,36 +80,36 @@
 ### Tests for User Story 1 (TDD - write first, then implement)
 
 **Unit**:
-- [ ] T030 [P] [US1] Unit test ListStocks use case with mocked StockVendorPort in tests/unit/application/list-stocks.spec.ts
-- [ ] T031 [P] [US1] Unit test Stock value/entity validation in tests/unit/domain/stock.spec.ts
+- [X] T030 [P] [US1] Unit test ListStocks use case with mocked StockVendorPort in tests/unit/application/list-stocks.spec.ts
+- [X] T031 [P] [US1] Unit test Stock value/entity validation in tests/unit/domain/stock.spec.ts
 
 **Integration**:
-- [ ] T032 [P] [US1] Integration test vendor HTTP adapter with nock in tests/integration/stock-vendor-adapter.spec.ts
+- [X] T032 [P] [US1] Integration test vendor HTTP adapter with nock in tests/integration/stock-vendor-adapter.spec.ts
 
 **Contract**:
-- [ ] T033 [US1] Contract test GET /stocks (200 shape, 502 on vendor error) in tests/contract/stocks.spec.ts
+- [X] T033 [US1] Contract test GET /stocks (200 shape, 502 on vendor error) in tests/contract/stocks.spec.ts
 
 **E2E** (optional, critical path):
-- [ ] T034 [US1] E2E test list stocks flow in tests/e2e/list-stocks.spec.ts
+- [X] T034 [US1] E2E test list stocks flow in tests/e2e/list-stocks.spec.ts
 
 ### Implementation for User Story 1
 
 **Domain**:
-- [ ] T035 [P] [US1] Create Stock entity/value in src/domain/entities/stock.ts (symbol, price)
+- [X] T035 [P] [US1] Create Stock entity/value in src/domain/entities/stock.ts (symbol, price)
 
 **Application**:
-- [ ] T036 [US1] Implement ListStocks use case in src/application/use-cases/list-stocks.ts (depends on StockVendorPort)
-- [ ] T037 [US1] Wire ListStocks in app container/factory in src/infrastructure/config/container.ts or equivalent
+- [X] T036 [US1] Implement ListStocks use case in src/application/use-cases/list-stocks.ts (depends on StockVendorPort)
+- [X] T037 [US1] Wire ListStocks in app container/factory in src/infrastructure/config/container.ts or equivalent
 
 **Infrastructure**:
-- [ ] T038 [US1] Implement StockVendorPort HTTP adapter in src/infrastructure/external/stock-vendor.adapter.ts (call vendor API, map to Stock[], handle timeout/5xx)
-- [ ] T039 [US1] Create stocks controller in src/infrastructure/http/controllers/stocks.controller.ts (call ListStocks, return JSON + nextToken)
-- [ ] T040 [US1] Define GET /stocks route and validation (query: nextToken, limit) in src/infrastructure/http/routes/stocks.routes.ts
-- [ ] T041 [US1] Mount Swagger UI at /api-docs serving OpenAPI spec in src/infrastructure/http/app.ts
+- [X] T038 [US1] Implement StockVendorPort HTTP adapter in src/infrastructure/external/stock-vendor.adapter.ts (call vendor API, map to Stock[], handle timeout/5xx)
+- [X] T039 [US1] Create stocks controller in src/infrastructure/http/controllers/stocks.controller.ts (call ListStocks, return JSON + nextToken)
+- [X] T040 [US1] Define GET /stocks route and validation (query: nextToken, limit) in src/infrastructure/http/routes/stocks.routes.ts
+- [X] T041 [US1] Mount Swagger UI at /api-docs serving OpenAPI spec in src/infrastructure/http/app.ts
 
 **Verification**:
-- [ ] T042 [US1] Run tests for US1 and verify coverage for list-stocks path
-- [ ] T043 [US1] Run ESLint with no errors on new files
+- [X] T042 [US1] Run tests for US1 and verify coverage for list-stocks path
+- [X] T043 [US1] Run ESLint with no errors on new files
 
 **Checkpoint**: List stocks works independently; evaluator can call GET /stocks and use /api-docs.
 

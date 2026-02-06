@@ -8,16 +8,18 @@ export interface Stock {
   name?: string;
 }
 
+export interface ListStocksRequest {
+  nextToken?: string;
+  limit: number;
+}
+
 export interface ListStocksResponse {
   stocks: Stock[];
-  nextToken?: string;
+  nextToken: string | null;
 }
 
 export interface StockVendorPort {
-  listStocks(params?: {
-    nextToken?: string;
-    limit?: number;
-  }): Promise<ListStocksResponse>;
+  listStocks(params: ListStocksRequest): Promise<ListStocksResponse>;
 
   getCurrentPrice(symbol: string): Promise<number>;
 }

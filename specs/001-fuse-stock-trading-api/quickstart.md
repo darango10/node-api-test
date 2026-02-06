@@ -37,17 +37,22 @@ SMTP_PORT=1025
 
 ## 2. Start the service
 
-```bash
-npm start
-```
-
-Or with dev reload:
+**Development mode** (with hot reload and auto-restart):
 
 ```bash
 npm run dev
 ```
 
+**Production mode**:
+
+```bash
+npm run build
+npm start
+```
+
 Service listens on `PORT` (default 3000). Ensure MongoDB is up before starting.
+
+**Note**: Environment variables are automatically loaded from `.env` file via dotenv package.
 
 ## 3. Verify and explore
 

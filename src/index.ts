@@ -1,10 +1,14 @@
 /**
  * Application entry point
  */
+// Load environment variables from .env file (must be first)
+import 'dotenv/config';
+
 import { loadConfig } from './infrastructure/config/index.js';
 import { logger } from './infrastructure/config/logger.js';
 import { connectDatabase, disconnectDatabase } from './infrastructure/persistence/mongo-connection.js';
 import { createApp } from './infrastructure/http/app.js';
+import { logAvailableEndpoints } from './infrastructure/http/utils/list-routes.js';
 import { Server } from 'http';
 
 // Global error handlers
@@ -31,8 +35,12 @@ const startServer = async (): Promise<Server> => {
 
     // Start HTTP server
     const server = app.listen(config.PORT, () => {
-      logger.info(`Server listening on port ${config.PORT}`);
-      logger.info(`Environment: ${config.NODE_ENV}`);
+      logger.info(`🚀 Server listening on port ${config.PORT}`);
+      logger.info(`🌍 Environment: ${config.NODE_ENV}`);
+      logger.info(`📚 API Documentation: http://localhost:${config.PORT}/api-docs`);
+
+      // List all available endpoints
+      logAvailableEndpoints(app);
     });
 
     // Graceful shutdown

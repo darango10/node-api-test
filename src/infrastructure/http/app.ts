@@ -1,17 +1,31 @@
 import express, { Express } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+import path from 'path';
 import { errorHandler } from './middlewares/error-handler.js';
 import { requestContextMiddleware } from './middlewares/request-context.js';
 import { generalRateLimiter } from './middlewares/rate-limit.js';
 import healthRoutes from './routes/health.routes.js';
 import metricsRoutes from './routes/metrics.routes.js';
+import { createStocksRouter } from './routes/stocks.routes';
+import { createContainer } from '../config/container';
 
 export const createApp = (): Express => {
   const app = express();
 
-  // Security middleware
-  app.use(helmet());
+  // Security middleware with Swagger UI exception
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+  }));
 
   // CORS configuration
   app.use(cors({
@@ -31,11 +45,25 @@ export const createApp = (): Express => {
   // Rate limiting
   app.use(generalRateLimiter);
 
+  // Load OpenAPI spec (resolve from src/infrastructure/http directory)
+  const openapiPath = path.resolve(process.cwd(), 'src/infrastructure/http/openapi.yaml');
+  const openapiDocument = YAML.load(openapiPath);
+
+  // Swagger UI (mounted before rate limiter for docs access)
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiDocument, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Stock Trading API Docs',
+  }));
+
   // Health and metrics routes (no rate limit)
   app.use(healthRoutes);
   app.use(metricsRoutes);
 
-  // API routes will be added here
+  // Create dependency injection container
+  const container = createContainer();
+
+  // API routes
+  app.use('/stocks', createStocksRouter(container.listStocksUseCase));
 
   // Error handler must be last
   app.use(errorHandler);
