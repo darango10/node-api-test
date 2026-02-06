@@ -1,0 +1,261 @@
+openapi: 3.0.3
+info:
+  title: Stock Trading API
+  description: |
+    Backend REST API for stock trading operations: list available stocks (paginated),
+    get user portfolio, execute purchases with price tolerance validation.
+    Daily report is generated and sent by email (not exposed as HTTP endpoint).
+  version: 1.0.0
+  contact: {}
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Stocks
+    description: List available stocks from vendor
+  - name: Portfolio
+    description: User portfolio (holdings)
+  - name: Purchases
+    description: Execute stock purchases
+  - name: Health
+    description: Liveness and observability
+
+paths:
+  /stocks:
+    get:
+      tags: [Stocks]
+      summary: List available stocks
+      description: Returns a page of available stocks from the vendor. Use nextToken for pagination.
+      operationId: listStocks
+      parameters:
+        - name: nextToken
+          in: query
+          required: false
+          description: Pagination token from previous response
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Max items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: A page of stocks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockListResponse'
+        '502':
+          description: Vendor unavailable or error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{userId}/portfolio:
+    get:
+      tags: [Portfolio]
+      summary: Get user portfolio
+      description: Returns the list of positions (stock symbol and quantity) for the given user.
+      operationId: getPortfolio
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: User identifier
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: User portfolio (may be empty)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioResponse'
+        '400':
+          description: Invalid userId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found (or invalid identifier)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{userId}/purchases:
+    post:
+      tags: [Purchases]
+      summary: Execute stock purchase
+      description: |
+        Submits a purchase for the given user. Price is validated against current vendor price
+        (within allowed tolerance, e.g. 2%). On success, transaction is recorded and portfolio updated.
+      operationId: executePurchase
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: User identifier
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseRequest'
+      responses:
+        '201':
+          description: Purchase executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseResponse'
+        '400':
+          description: Validation error (e.g. negative quantity, missing symbol, price out of tolerance)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User or stock not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Vendor unavailable or error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Liveness/readiness for orchestrators
+      operationId: health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /metrics:
+    get:
+      tags: [Health]
+      summary: Metrics
+      description: Prometheus-format metrics (optional)
+      operationId: metrics
+      responses:
+        '200':
+          description: Metrics payload
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  schemas:
+    Stock:
+      type: object
+      required: [symbol, price]
+      properties:
+        symbol:
+          type: string
+          example: AAPL
+        price:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+
+    StockListResponse:
+      type: object
+      required: [stocks]
+      properties:
+        stocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stock'
+        nextToken:
+          type: string
+          nullable: true
+          description: Present if more pages exist
+
+    Position:
+      type: object
+      required: [symbol, quantity]
+      properties:
+        symbol:
+          type: string
+        quantity:
+          type: integer
+          minimum: 0
+
+    PortfolioResponse:
+      type: object
+      required: [userId, positions]
+      properties:
+        userId:
+          type: string
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Position'
+
+    PurchaseRequest:
+      type: object
+      required: [symbol, quantity, price]
+      properties:
+        symbol:
+          type: string
+          minLength: 1
+        quantity:
+          type: integer
+          minimum: 1
+        price:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+
+    PurchaseResponse:
+      type: object
+      required: [transactionId, outcome]
+      properties:
+        transactionId:
+          type: string
+        outcome:
+          type: string
+          enum: [success]
+        message:
+          type: string
+          description: Optional human-readable message
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Optional machine-readable code

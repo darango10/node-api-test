@@ -23,13 +23,13 @@
 
 **Purpose**: Project initialization and hexagonal structure per plan and constitution
 
-- [ ] T001 Create hexagonal architecture directories in src/ (domain/entities, domain/services, domain/errors, application/use-cases, application/services, infrastructure/http, infrastructure/persistence, infrastructure/external, infrastructure/email, infrastructure/config, ports/repositories, ports/services)
-- [ ] T002 Initialize Node.js project with package.json, TypeScript, and dependencies (express, mongoose, swagger-ui-express, joi or zod, pino or winston, helmet, express-rate-limit) in repository root
-- [ ] T003 [P] Configure ESLint with security plugins (eslint-plugin-security, eslint-plugin-node) in .eslintrc or eslint.config.js
-- [ ] T004 [P] Configure Prettier in .prettierrc or .prettierrc.js
-- [ ] T005 [P] Setup testing framework (Jest or Vitest) with coverage threshold ≥80% in package.json and config
-- [ ] T006 [P] Copy OpenAPI spec from specs/001-fuse-stock-trading-api/contracts/openapi.yaml to a location served by app (e.g. src/infrastructure/http/openapi.yaml or public/openapi.yaml)
-- [ ] T007 Setup dependency injection or factory pattern for ports (e.g. awilix/tsyringe or plain factories in src/infrastructure/config/container.ts)
+- [X] T001 Create hexagonal architecture directories in src/ (domain/entities, domain/services, domain/errors, application/use-cases, application/services, infrastructure/http, infrastructure/persistence, infrastructure/external, infrastructure/email, infrastructure/config, ports/repositories, ports/services)
+- [X] T002 Initialize Node.js project with package.json, TypeScript, and dependencies (express, mongoose, swagger-ui-express, joi or zod, pino or winston, helmet, express-rate-limit) in repository root
+- [X] T003 [P] Configure ESLint with security plugins (eslint-plugin-security, eslint-plugin-node) in .eslintrc or eslint.config.js
+- [X] T004 [P] Configure Prettier in .prettierrc or .prettierrc.js
+- [X] T005 [P] Setup testing framework (Jest or Vitest) with coverage threshold ≥80% in package.json and config
+- [X] T006 [P] Copy OpenAPI spec from specs/001-fuse-stock-trading-api/contracts/openapi.yaml to a location served by app (e.g. src/infrastructure/http/openapi.yaml or public/openapi.yaml)
+- [X] T007 Setup dependency injection or factory pattern for ports (e.g. awilix/tsyringe or plain factories in src/infrastructure/config/container.ts)
 
 ---
 
