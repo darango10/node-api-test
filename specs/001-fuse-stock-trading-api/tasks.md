@@ -38,34 +38,34 @@
 **Purpose**: Core infrastructure per constitution. No user story work until this phase is complete.
 
 **Error Handling (Constitution V)**:
-- [ ] T010 Create custom error classes extending Error (AppError, ValidationError, NotFoundError, DomainError) in src/domain/errors/index.ts
-- [ ] T011 Implement centralized error handler middleware in src/infrastructure/http/middlewares/error-handler.ts
-- [ ] T012 Register global unhandledRejection and uncaughtException handlers in src/index.ts or app bootstrap
+- [X] T010 Create custom error classes extending Error (AppError, ValidationError, NotFoundError, DomainError) in src/domain/errors/index.ts
+- [X] T011 Implement centralized error handler middleware in src/infrastructure/http/middlewares/error-handler.ts
+- [X] T012 Register global unhandledRejection and uncaughtException handlers in src/index.ts or app bootstrap
 
 **Logging & Observability (Constitution VI)**:
-- [ ] T013 [P] Setup structured logging (pino or winston) logging to stdout in src/infrastructure/config/logger.ts
-- [ ] T014 [P] Implement AsyncLocalStorage for request correlation ID in src/infrastructure/http/middlewares/request-context.ts
-- [ ] T015 [P] Create GET /health endpoint (liveness/readiness) in src/infrastructure/http/routes/health.routes.ts
-- [ ] T016 [P] Create GET /metrics endpoint (Prometheus format) in src/infrastructure/http/routes/metrics.routes.ts
+- [X] T013 [P] Setup structured logging (pino or winston) logging to stdout in src/infrastructure/config/logger.ts
+- [X] T014 [P] Implement AsyncLocalStorage for request correlation ID in src/infrastructure/http/middlewares/request-context.ts
+- [X] T015 [P] Create GET /health endpoint (liveness/readiness) in src/infrastructure/http/routes/health.routes.ts
+- [X] T016 [P] Create GET /metrics endpoint (Prometheus format) in src/infrastructure/http/routes/metrics.routes.ts
 
 **Security (Constitution VII)**:
-- [ ] T017 [P] Setup helmet middleware in src/infrastructure/http/app.ts or middlewares
-- [ ] T018 [P] Implement rate limiting middleware (express-rate-limit) in src/infrastructure/http/middlewares/rate-limit.ts
-- [ ] T019 [P] Add request body size limit (e.g. express.json({ limit })) in src/infrastructure/http/app.ts
-- [ ] T020 [P] Configure CORS in src/infrastructure/http/app.ts (no wildcard in production)
+- [X] T017 [P] Setup helmet middleware in src/infrastructure/http/app.ts or middlewares
+- [X] T018 [P] Implement rate limiting middleware (express-rate-limit) in src/infrastructure/http/middlewares/rate-limit.ts
+- [X] T019 [P] Add request body size limit (e.g. express.json({ limit })) in src/infrastructure/http/app.ts
+- [X] T020 [P] Configure CORS in src/infrastructure/http/app.ts (no wildcard in production)
 
 **Configuration & Process**:
-- [ ] T021 Setup environment-aware config with validation (e.g. zod/env-var) in src/infrastructure/config/index.ts (MONGODB_URI, PORT, VENDOR_API_URL, etc.)
-- [ ] T022 Implement graceful shutdown (SIGTERM, SIGINT) closing server and MongoDB in src/index.ts
+- [X] T021 Setup environment-aware config with validation (e.g. zod/env-var) in src/infrastructure/config/index.ts (MONGODB_URI, PORT, VENDOR_API_URL, etc.)
+- [X] T022 Implement graceful shutdown (SIGTERM, SIGINT) closing server and MongoDB in src/index.ts
 
 **Port Definitions (Hexagonal)**:
-- [ ] T023 [P] Define StockVendorPort interface in src/ports/services/stock-vendor.port.ts (listStocks, getCurrentPrice)
-- [ ] T024 [P] Define PortfolioRepository port in src/ports/repositories/portfolio-repository.port.ts (getByUserId, upsertPosition)
-- [ ] T025 [P] Define TransactionRepository port in src/ports/repositories/transaction-repository.port.ts (save, findSince)
-- [ ] T026 [P] Define EmailSenderPort interface in src/ports/services/email-sender.port.ts (send)
+- [X] T023 [P] Define StockVendorPort interface in src/ports/services/stock-vendor.port.ts (listStocks, getCurrentPrice)
+- [X] T024 [P] Define PortfolioRepository port in src/ports/repositories/portfolio-repository.port.ts (getByUserId, upsertPosition)
+- [X] T025 [P] Define TransactionRepository port in src/ports/repositories/transaction-repository.port.ts (save, findSince)
+- [X] T026 [P] Define EmailSenderPort interface in src/ports/services/email-sender.port.ts (send)
 
 **Infrastructure - MongoDB**:
-- [ ] T027 Setup MongoDB connection with Mongoose in src/infrastructure/persistence/mongo-connection.ts (connect/disconnect, used by adapters)
+- [X] T027 Setup MongoDB connection with Mongoose in src/infrastructure/persistence/mongo-connection.ts (connect/disconnect, used by adapters)
 
 **Checkpoint**: Foundation ready; user story implementation can begin.
 
