@@ -31,11 +31,11 @@ description: "Task list for Docker deployment implementation"
 
 **Purpose**: Copy Docker configuration from contracts/ to repository root and prepare for implementation
 
-- [ ] T001 Copy Dockerfile from specs/002-docker-deploy/contracts/Dockerfile to repository root
-- [ ] T002 [P] Copy docker-compose.yml from specs/002-docker-deploy/contracts/docker-compose.yml to repository root
-- [ ] T003 [P] Copy .dockerignore from specs/002-docker-deploy/contracts/.dockerignore to repository root
-- [ ] T004 [P] Copy .hadolint.yaml from specs/002-docker-deploy/contracts/.hadolint.yaml to repository root
-- [ ] T005 Verify .env.example exists and contains all required Docker environment variables
+- [x] T001 Copy Dockerfile from specs/002-docker-deploy/contracts/Dockerfile to repository root
+- [x] T002 [P] Copy docker-compose.yml from specs/002-docker-deploy/contracts/docker-compose.yml to repository root
+- [x] T003 [P] Copy .dockerignore from specs/002-docker-deploy/contracts/.dockerignore to repository root
+- [x] T004 [P] Copy .hadolint.yaml from specs/002-docker-deploy/contracts/.hadolint.yaml to repository root
+- [x] T005 Verify .env.example exists and contains all required Docker environment variables
 
 ---
 

@@ -1,0 +1,110 @@
+# =============================================================================
+# Docker Compose Configuration for Local Development
+# =============================================================================
+# This file orchestrates the Stock Trading API with MongoDB for local testing.
+#
+# Usage:
+#   Start services:     docker-compose up
+#   Stop services:      docker-compose down
+#   Rebuild app:        docker-compose up --build
+#   View logs:          docker-compose logs -f app
+#   Reset database:     docker-compose down -v
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # Application Service
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: stock-trading-api:dev
+    container_name: stock-trading-api
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGODB_URI: mongodb://mongo:27017/stock-trading
+      LOG_LEVEL: debug
+    env_file:
+      - .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # MongoDB Database Service
+  # ---------------------------------------------------------------------------
+  mongo:
+    image: mongo:7-jammy
+    container_name: stock-trading-mongo
+    ports:
+      - "27017:27017"  # Optional: expose for external tools (MongoDB Compass)
+    environment:
+      MONGO_INITDB_DATABASE: stock-trading
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Optional: MongoDB Express (Web UI for database inspection)
+  # ---------------------------------------------------------------------------
+  # Uncomment to enable MongoDB web interface at http://localhost:8081
+  # mongo-express:
+  #   image: mongo-express:latest
+  #   container_name: stock-trading-mongo-express
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     ME_CONFIG_MONGODB_URL: mongodb://mongo:27017
+  #     ME_CONFIG_BASICAUTH: false
+  #   depends_on:
+  #     - mongo
+  #   restart: unless-stopped
+  #   networks:
+  #     - app-network
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  app-network:
+    driver: bridge
