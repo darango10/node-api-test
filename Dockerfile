@@ -16,15 +16,8 @@
 # -----------------------------------------------------------------------------
 FROM node:20-alpine AS base
 
-# Install dumb-init for proper signal handling
-# (handles SIGTERM/SIGINT for graceful shutdown)
-RUN apk add --no-cache dumb-init=~1.2
-
 # Set working directory
 WORKDIR /app
-
-# Set NODE_ENV for optimization
-ENV NODE_ENV=production
 
 # -----------------------------------------------------------------------------
 # Stage 2: Builder - Install dependencies and compile TypeScript
@@ -53,6 +46,9 @@ RUN npm prune --omit=dev
 # -----------------------------------------------------------------------------
 FROM base AS production
 
+# Set NODE_ENV for production optimization
+ENV NODE_ENV=production
+
 # Copy compiled application and production dependencies from builder
 # Use --chown to set ownership to node user (non-root)
 COPY --from=builder --chown=node:node /app/dist ./dist
@@ -75,8 +71,8 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
 # Start the application
-# Use dumb-init as PID 1 for proper signal forwarding (SIGTERM/SIGINT)
+# Node.js 20+ handles signals properly when running as PID 1
+# Application has graceful shutdown handlers (SIGTERM/SIGINT)
 # Set v8 max heap size to 90% of container memory limit (prevents OOM)
 # For 512MB container: --max-old-space-size=460
-ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "--max-old-space-size=460", "dist/index.js"]

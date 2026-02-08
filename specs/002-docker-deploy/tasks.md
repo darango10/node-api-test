@@ -54,27 +54,27 @@ description: "Task list for Docker deployment implementation"
 ### Implementation for User Story 1
 
 **Dockerfile Validation**:
-- [ ] T010 [US1] Validate Dockerfile at repository root passes hadolint linting
-- [ ] T011 [US1] Verify Dockerfile uses multi-stage build (base, builder, production stages)
-- [ ] T012 [US1] Verify Dockerfile uses node:20-alpine base image
-- [ ] T013 [US1] Verify Dockerfile runs as non-root user (USER node)
-- [ ] T014 [US1] Verify Dockerfile includes HEALTHCHECK instruction with /health endpoint
+- [x] T010 [US1] Validate Dockerfile at repository root passes hadolint linting
+- [x] T011 [US1] Verify Dockerfile uses multi-stage build (base, builder, production stages)
+- [x] T012 [US1] Verify Dockerfile uses node:20-alpine base image
+- [x] T013 [US1] Verify Dockerfile runs as non-root user (USER node)
+- [x] T014 [US1] Verify Dockerfile includes HEALTHCHECK instruction with /health endpoint
 
 **Build Process**:
-- [ ] T015 [US1] Build image with explicit tag: `docker build -t stock-trading-api:1.0.0 .`
-- [ ] T016 [US1] Verify build completes within 5 minutes on clean build
-- [ ] T017 [US1] Verify final image size is approximately 170MB (check with `docker images`)
-- [ ] T018 [US1] Verify image contains only production files (no devDependencies, tests, or .git)
+- [x] T015 [US1] Build image with explicit tag: `docker build -t stock-trading-api:1.0.0 .`
+- [x] T016 [US1] Verify build completes within 5 minutes on clean build
+- [x] T017 [US1] Verify final image size is approximately 170MB (check with `docker images`)
+- [x] T018 [US1] Verify image contains only production files (no devDependencies, tests, or .git)
 
 **Build Reproducibility**:
-- [ ] T019 [US1] Build image twice from same source and compare digests
-- [ ] T020 [US1] Verify .dockerignore excludes secrets (.env, *.key), node_modules, dist, .git
+- [x] T019 [US1] Build image twice from same source and compare digests
+- [x] T020 [US1] Verify .dockerignore excludes secrets (.env, *.key), node_modules, dist, .git
 
 **Image Inspection**:
-- [ ] T021 [US1] Inspect image history: `docker history stock-trading-api:1.0.0`
-- [ ] T022 [US1] Verify no secrets in image layers
-- [ ] T023 [US1] Verify image entrypoint is `dumb-init`
-- [ ] T024 [US1] Verify CMD includes `node dist/index.js` with v8 memory flag
+- [x] T021 [US1] Inspect image history: `docker history stock-trading-api:1.0.0`
+- [x] T022 [US1] Verify no secrets in image layers
+- [x] T023 [US1] Verify image entrypoint is `docker-entrypoint.sh` (provides signal handling)
+- [x] T024 [US1] Verify CMD includes `node dist/index.js` with v8 memory flag
 
 **Checkpoint**: At this point, a buildable container image exists and can be distributed to any environment.
 
