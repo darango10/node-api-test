@@ -164,37 +164,37 @@
 ### Tests for User Story 3
 
 **Unit**:
-- [ ] T056 [P] [US3] Unit test price tolerance validation (2%) in tests/unit/domain/price-tolerance.spec.ts
-- [ ] T057 [P] [US3] Unit test ExecutePurchase use case with mocks in tests/unit/application/execute-purchase.spec.ts
-- [ ] T058 [P] [US3] Unit test Transaction entity in tests/unit/domain/transaction.spec.ts
+- [X] T056 [P] [US3] Unit test price tolerance validation (2%) in tests/unit/domain/price-tolerance.spec.ts
+- [X] T057 [P] [US3] Unit test ExecutePurchase use case with mocks in tests/unit/application/execute-purchase.spec.ts
+- [X] T058 [P] [US3] Unit test Transaction entity in tests/unit/domain/transaction.spec.ts
 
 **Integration**:
-- [ ] T059 [P] [US3] Integration test TransactionRepository adapter in tests/integration/transaction-repository.spec.ts
-- [ ] T060 [US3] Integration test ExecutePurchase with real PortfolioRepo + TransactionRepo (test DB) in tests/integration/execute-purchase.spec.ts
+- [X] T059 [P] [US3] Integration test TransactionRepository adapter in tests/integration/transaction-repository.spec.ts
+- [X] T060 [US3] Integration test ExecutePurchase with real PortfolioRepo + TransactionRepo (test DB) in tests/integration/execute-purchase.spec.ts
 
 **Contract**:
-- [ ] T061 [US3] Contract test POST /users/:userId/purchases (201, 400, 404, 502) in tests/contract/purchases.spec.ts
+- [X] T061 [US3] Contract test POST /users/:userId/purchases (201, 400, 404, 502) in tests/contract/purchases.spec.ts
 
 ### Implementation for User Story 3
 
 **Domain**:
-- [ ] T062 [P] [US3] Create Transaction entity in src/domain/entities/transaction.ts (userId, symbol, quantity, price, outcome, reason?, createdAt)
-- [ ] T063 [US3] Implement price tolerance domain service (e.g. isWithinTolerance(requested, current, percent)) in src/domain/services/price-tolerance.ts
+- [X] T062 [P] [US3] Create Transaction entity in src/domain/entities/transaction.ts (userId, symbol, quantity, price, outcome, reason?, createdAt)
+- [X] T063 [US3] Implement price tolerance domain service (e.g. isWithinTolerance(requested, current, percent)) in src/domain/services/price-tolerance.ts
 
 **Application**:
-- [ ] T064 [US3] Implement ExecutePurchase use case in src/application/use-cases/execute-purchase.ts (get current price from vendor, validate tolerance, save transaction, upsert portfolio on success only)
-- [ ] T065 [US3] Wire ExecutePurchase and TransactionRepository in container
+- [X] T064 [US3] Implement ExecutePurchase use case in src/application/use-cases/execute-purchase.ts (get current price from vendor, validate tolerance, save transaction, upsert portfolio on success only)
+- [X] T065 [US3] Wire ExecutePurchase and TransactionRepository in container
 
 **Infrastructure**:
-- [ ] T066 [US3] Create Mongoose schema and model for Transaction in src/infrastructure/persistence/models/transaction.model.ts
-- [ ] T067 [US3] Implement TransactionRepository adapter in src/infrastructure/persistence/transaction.repository.ts (save, findSince)
-- [ ] T068 [US3] Add getCurrentPrice to StockVendorPort and vendor adapter if not already present in src/ports/services/stock-vendor.port.ts and src/infrastructure/external/stock-vendor.adapter.ts
-- [ ] T069 [US3] Create purchases controller in src/infrastructure/http/controllers/purchases.controller.ts
-- [ ] T070 [US3] Define POST /users/:userId/purchases route and request body validation (symbol, quantity, price) in src/infrastructure/http/routes/purchases.routes.ts
-- [ ] T071 [US3] Ensure portfolio upsertPosition uses atomic update for concurrency in src/infrastructure/persistence/portfolio.repository.ts
+- [X] T066 [US3] Create Mongoose schema and model for Transaction in src/infrastructure/persistence/models/transaction.model.ts
+- [X] T067 [US3] Implement TransactionRepository adapter in src/infrastructure/persistence/transaction.repository.ts (save, findSince)
+- [X] T068 [US3] Add getCurrentPrice to StockVendorPort and vendor adapter if not already present in src/ports/services/stock-vendor.port.ts and src/infrastructure/external/stock-vendor.adapter.ts
+- [X] T069 [US3] Create purchases controller in src/infrastructure/http/controllers/purchases.controller.ts
+- [X] T070 [US3] Define POST /users/:userId/purchases route and request body validation (symbol, quantity, price) in src/infrastructure/http/routes/purchases.routes.ts
+- [X] T071 [US3] Ensure portfolio upsertPosition uses atomic update for concurrency in src/infrastructure/persistence/portfolio.repository.ts
 
 **Verification**:
-- [ ] T072 [US3] Run US3 tests and lint; verify concurrent purchase test if added
+- [X] T072 [US3] Run US3 tests and lint; verify concurrent purchase test if added
 
 **Checkpoint**: Execute purchase works; full trading flow (list → portfolio → purchase) is demoable.
 
