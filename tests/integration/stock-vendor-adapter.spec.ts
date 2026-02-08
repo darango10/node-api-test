@@ -163,11 +163,18 @@ describe('StockVendorAdapter Integration', () => {
       it('when vendor returns valid price for symbol', async () => {
         // Arrange
         nock(vendorBaseUrl)
-          .get('/stocks/AAPL/price')
+          .get('/stocks')
+          .query({ limit: 1000 })
           .matchHeader('x-api-key', testApiKey)
           .reply(200, {
             status: 200,
-            data: { price: 155.50 }
+            data: {
+              items: [
+                { symbol: 'AAPL', price: 155.50, name: 'Apple Inc.' },
+                { symbol: 'GOOGL', price: 2800.00, name: 'Alphabet Inc.' },
+              ],
+              nextToken: null
+            }
           });
 
         // Act
@@ -182,22 +189,29 @@ describe('StockVendorAdapter Integration', () => {
       it('when symbol is not found', async () => {
         // Arrange
         nock(vendorBaseUrl)
-          .get('/stocks/INVALID/price')
+          .get('/stocks')
+          .query({ limit: 1000 })
           .matchHeader('x-api-key', testApiKey)
-          .reply(404, { 
-            status: 404,
-            error: 'Stock not found' 
+          .reply(200, {
+            status: 200,
+            data: {
+              items: [
+                { symbol: 'AAPL', price: 155.50, name: 'Apple Inc.' },
+              ],
+              nextToken: null
+            }
           });
 
         // Act & Assert
         await expect(adapter.getCurrentPrice('INVALID'))
-          .rejects.toThrow();
+          .rejects.toThrow('Stock symbol INVALID not found');
       });
 
       it('when vendor returns 5xx error', async () => {
         // Arrange
         nock(vendorBaseUrl)
-          .get('/stocks/AAPL/price')
+          .get('/stocks')
+          .query({ limit: 1000 })
           .matchHeader('x-api-key', testApiKey)
           .reply(500, { 
             status: 500,
@@ -206,7 +220,7 @@ describe('StockVendorAdapter Integration', () => {
 
         // Act & Assert
         await expect(adapter.getCurrentPrice('AAPL'))
-          .rejects.toThrow();
+          .rejects.toThrow('Vendor service unavailable');
       });
     });
   });

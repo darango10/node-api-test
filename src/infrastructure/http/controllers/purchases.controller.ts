@@ -7,7 +7,7 @@ import { logger } from '../../config/logger';
  * Controller for purchase operations
  */
 export class PurchasesController {
-  constructor(private readonly executePurchase: ExecutePurchase) {}
+  constructor(private readonly executePurchase: ExecutePurchase) { }
 
   /**
    * Handle POST /users/:userId/purchases
@@ -95,7 +95,7 @@ export class PurchasesController {
       } else {
         // Failed purchase - determine appropriate status code
         const statusCode = this.getErrorStatusCode(result.error || '');
-        
+
         res.status(statusCode).json({
           success: false,
           error: result.error,
@@ -131,6 +131,11 @@ export class PurchasesController {
     // Stock not found
     if (lowerError.includes('not found')) {
       return 404;
+    }
+
+    // Vendor authentication failed
+    if (lowerError.includes('authentication') || lowerError.includes('api key')) {
+      return 502; // Bad Gateway - upstream authentication issue
     }
 
     // Vendor unavailable or timeout

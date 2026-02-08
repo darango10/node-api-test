@@ -3,7 +3,9 @@ import { Stock } from '../../domain/entities/stock';
 import { 
   StockVendorPort, 
   ListStocksRequest, 
-  ListStocksResponse 
+  ListStocksResponse,
+  BuyStockRequest,
+  BuyStockResponse
 } from '../../ports/services/stock-vendor.port';
 import { logger } from '../config/logger';
 
@@ -62,8 +64,23 @@ export class StockVendorAdapter implements StockVendorPort {
 
         const response = await this.client.get('/stocks', { params });
 
+        // Log vendor response
+        logger.debug(
+          { 
+            page: pageCount,
+            statusCode: response.status,
+            itemsCount: response.data?.data?.items?.length || 0,
+            hasNextToken: !!response.data?.data?.nextToken,
+          },
+          'Vendor response received for listStocks'
+        );
+
         // Validate response structure (vendor format: data.items, data.nextToken)
         if (!response.data?.data?.items || !Array.isArray(response.data.data.items)) {
+          logger.error(
+            { responseData: response.data },
+            'Invalid response format from vendor'
+          );
           throw new Error('Invalid response format from vendor');
         }
 
@@ -104,12 +121,19 @@ export class StockVendorAdapter implements StockVendorPort {
       };
     } catch (error: unknown) {
       const err = error as Error;
-      logger.error(
-        { error: err.message },
-        'Failed to fetch stocks from vendor'
-      );
-
+      
       if (axios.isAxiosError(error)) {
+        // Log detailed vendor error response
+        logger.error(
+          { 
+            error: err.message,
+            statusCode: error.response?.status,
+            vendorResponse: error.response?.data,
+            errorCode: error.code,
+          },
+          'Failed to fetch stocks from vendor'
+        );
+
         if (error.code === 'ECONNABORTED') {
           throw new Error('Vendor request timeout');
         }
@@ -119,6 +143,12 @@ export class StockVendorAdapter implements StockVendorPort {
         if (error.response?.status === 404) {
           throw new Error('Vendor endpoint not found');
         }
+      } else {
+        // Non-axios error
+        logger.error(
+          { error: err.message },
+          'Unexpected error fetching stocks'
+        );
       }
 
       throw new Error(
@@ -137,31 +167,72 @@ export class StockVendorAdapter implements StockVendorPort {
     try {
       logger.info({ symbol }, 'Fetching current price from vendor');
 
-      const response = await this.client.get(`/stocks/${symbol}/price`);
+      // Fetch all stocks and find the specific symbol
+      // The vendor API doesn't have a separate price endpoint
+      const response = await this.client.get('/stocks', {
+        params: { limit: 1000 }, // Get all stocks to search for the symbol
+      });
 
-      // Try nested data structure first (data.data.price), then fallback to data.price
-      const price = response.data?.data?.price ?? response.data?.price;
+      // Log vendor response
+      logger.debug(
+        { 
+          symbol,
+          statusCode: response.status,
+          totalStocks: response.data?.data?.items?.length || 0,
+        },
+        'Vendor response received for getCurrentPrice'
+      );
 
-      if (typeof price !== 'number') {
+      // Validate response structure
+      if (!response.data?.data?.items || !Array.isArray(response.data.data.items)) {
+        logger.error(
+          { symbol, responseData: response.data },
+          'Invalid response format from vendor for getCurrentPrice'
+        );
+        throw new Error('Invalid response format from vendor');
+      }
+
+      // Find the stock by symbol
+      const stock = response.data.data.items.find(
+        (item: { symbol: string; price: number }) => 
+          item.symbol.toUpperCase() === symbol.toUpperCase()
+      );
+
+      if (!stock) {
+        throw new Error(`Stock symbol ${symbol} not found`);
+      }
+
+      if (typeof stock.price !== 'number') {
         throw new Error('Invalid price response from vendor');
       }
 
       logger.info(
-        { symbol, price },
+        { symbol, price: stock.price },
         'Price fetched successfully'
       );
 
-      return price;
+      return stock.price;
     } catch (error: unknown) {
       const err = error as Error;
-      logger.error(
-        { error: err.message, symbol },
-        'Failed to fetch price from vendor'
-      );
-
+      
       if (axios.isAxiosError(error)) {
+        // Log detailed vendor error response
+        logger.error(
+          { 
+            error: err.message, 
+            symbol,
+            statusCode: error.response?.status,
+            vendorResponse: error.response?.data,
+            errorCode: error.code,
+          },
+          'Failed to fetch price from vendor'
+        );
+
         if (error.code === 'ECONNABORTED') {
           throw new Error('Vendor request timeout');
+        }
+        if (error.response?.status === 403) {
+          throw new Error('Vendor authentication failed - invalid or expired API key');
         }
         if (error.response?.status === 404) {
           throw new Error(`Stock symbol ${symbol} not found`);
@@ -169,10 +240,127 @@ export class StockVendorAdapter implements StockVendorPort {
         if (error.response?.status && error.response.status >= 500) {
           throw new Error('Vendor service unavailable');
         }
+      } else {
+        // Non-axios error
+        logger.error(
+          { error: err.message, symbol },
+          'Unexpected error fetching price'
+        );
       }
 
       throw new Error(
         `Failed to fetch price: ${err.message || 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Execute a stock purchase through the vendor API
+   * @param request - Buy request with symbol, quantity, and price
+   * @returns Buy response with order details
+   * @throws Error if vendor is unavailable or purchase fails
+   */
+  async executeBuy(request: BuyStockRequest): Promise<BuyStockResponse> {
+    const { symbol, quantity, price } = request;
+
+    try {
+      logger.info(
+        { symbol, quantity, price },
+        'Executing buy order with vendor'
+      );
+
+      const response = await this.client.post(`/stocks/${symbol}/buy`, {
+        quantity,
+        price,
+      });
+
+      // Log full vendor response for buy order
+      logger.info(
+        { 
+          symbol, 
+          quantity, 
+          price,
+          statusCode: response.status,
+          vendorStatus: response.data?.status,
+          vendorMessage: response.data?.message,
+          order: response.data?.data?.order,
+        },
+        'Vendor response received for buy order'
+      );
+
+      // Vendor response format: { status, message, data: { order } }
+      if (response.data?.status === 200 && response.data?.data?.order) {
+        const order = response.data.data.order;
+        
+        logger.info(
+          { symbol, quantity, price, total: order.total },
+          'Buy order executed successfully with vendor'
+        );
+
+        return {
+          success: true,
+          order: {
+            symbol: order.symbol,
+            quantity: order.quantity,
+            price: order.price,
+            total: order.total,
+          },
+          message: response.data.message || 'Order placed successfully',
+        };
+      }
+
+      // Unexpected response format
+      logger.error(
+        { symbol, quantity, price, responseData: response.data },
+        'Invalid response format from vendor buy endpoint'
+      );
+      throw new Error('Invalid response format from vendor buy endpoint');
+
+    } catch (error: unknown) {
+      const err = error as Error;
+      
+      if (axios.isAxiosError(error)) {
+        // Log detailed vendor error response
+        logger.error(
+          { 
+            error: err.message,
+            symbol, 
+            quantity, 
+            price,
+            statusCode: error.response?.status,
+            vendorResponse: error.response?.data,
+            errorCode: error.code,
+          },
+          'Failed to execute buy order with vendor'
+        );
+
+        if (error.code === 'ECONNABORTED') {
+          throw new Error('Vendor request timeout');
+        }
+        if (error.response?.status === 403) {
+          throw new Error('Vendor authentication failed - invalid or expired API key');
+        }
+        if (error.response?.status === 404) {
+          throw new Error(`Stock symbol ${symbol} not found`);
+        }
+        if (error.response?.status === 400) {
+          // Vendor rejected the purchase (e.g., invalid price, quantity)
+          const message = error.response?.data?.message || 'Invalid purchase request';
+          throw new Error(`Vendor rejected purchase: ${message}`);
+        }
+        if (error.response?.status && error.response.status >= 500) {
+          throw new Error('Vendor service unavailable');
+        }
+      } else {
+        // Non-axios error
+        logger.error(
+          { error: err.message, symbol, quantity, price },
+          'Unexpected error executing buy order'
+        );
+      }
+
+      throw new Error(
+        `Failed to execute buy: ${err.message || 'Unknown error'}`
       );
     }
   }

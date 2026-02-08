@@ -47,7 +47,7 @@ export class ExecutePurchase {
     private readonly stockVendorPort: StockVendorPort,
     private readonly portfolioRepository: PortfolioRepositoryPort,
     private readonly transactionRepository: TransactionRepositoryPort
-  ) {}
+  ) { }
 
   async execute(request: ExecutePurchaseRequest): Promise<ExecutePurchaseResult> {
     const { userId, symbol, quantity, price } = request;
@@ -100,13 +100,52 @@ export class ExecutePurchase {
         };
       }
 
-      // Price is within tolerance - proceed with purchase
+      // Price is within tolerance - execute purchase with vendor
       logger.info(
         { userId, symbol, quantity, price },
-        'Price within tolerance, proceeding with purchase'
+        'Price within tolerance, executing purchase with vendor'
       );
 
-      // Create successful transaction
+      // Execute buy order with vendor
+      const buyResult = await this.stockVendorPort.executeBuy({
+        symbol,
+        quantity,
+        price,
+      });
+
+      if (!buyResult.success) {
+        // Vendor rejected the purchase
+        const reason = buyResult.message || 'Vendor rejected purchase';
+        
+        logger.warn(
+          { userId, symbol, quantity, price, reason },
+          'Purchase failed: vendor rejected'
+        );
+
+        const transaction = new Transaction(
+          userId,
+          symbol,
+          quantity,
+          price,
+          TransactionOutcome.FAILURE,
+          reason
+        );
+
+        await this.saveTransactionSafely(transaction);
+
+        return {
+          success: false,
+          transaction,
+          error: reason,
+        };
+      }
+
+      // Vendor accepted the purchase - create successful transaction
+      logger.info(
+        { userId, symbol, quantity, price, total: buyResult.order?.total },
+        'Purchase executed successfully with vendor'
+      );
+
       const transaction = new Transaction(
         userId,
         symbol,
@@ -193,10 +232,10 @@ export class ExecutePurchase {
     try {
       await this.transactionRepository.save(transaction);
       logger.info(
-        { 
-          userId: transaction.userId, 
+        {
+          userId: transaction.userId,
           symbol: transaction.symbol,
-          outcome: transaction.outcome 
+          outcome: transaction.outcome
         },
         'Transaction recorded'
       );

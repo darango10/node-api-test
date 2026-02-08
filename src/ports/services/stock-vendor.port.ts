@@ -18,8 +18,27 @@ export interface ListStocksResponse {
   nextToken: string | null;
 }
 
+export interface BuyStockRequest {
+  symbol: string;
+  quantity: number;
+  price: number;
+}
+
+export interface BuyStockResponse {
+  success: boolean;
+  order?: {
+    symbol: string;
+    quantity: number;
+    price: number;
+    total: number;
+  };
+  message?: string;
+}
+
 export interface StockVendorPort {
   listStocks(params: ListStocksRequest): Promise<ListStocksResponse>;
 
   getCurrentPrice(symbol: string): Promise<number>;
+
+  executeBuy(request: BuyStockRequest): Promise<BuyStockResponse>;
 }

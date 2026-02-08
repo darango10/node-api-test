@@ -17,6 +17,7 @@ describe('ExecutePurchase Use Case', () => {
     mockStockVendorPort = {
       listStocks: vi.fn(),
       getCurrentPrice: vi.fn(),
+      executeBuy: vi.fn(),
     };
 
     mockPortfolioRepository = {
@@ -38,7 +39,7 @@ describe('ExecutePurchase Use Case', () => {
   });
 
   describe('successful purchase', () => {
-    it('should execute purchase when price is within tolerance', async () => {
+    it('should execute purchase when price is within tolerance and vendor accepts', async () => {
       // Arrange
       const userId = 'user123';
       const symbol = 'AAPL';
@@ -47,6 +48,11 @@ describe('ExecutePurchase Use Case', () => {
       const currentPrice = 151.00; // Within 2% (148.5 - 153)
 
       vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(currentPrice);
+      vi.mocked(mockStockVendorPort.executeBuy).mockResolvedValue({
+        success: true,
+        order: { symbol, quantity, price: requestedPrice, total: requestedPrice * quantity },
+        message: 'Order placed successfully',
+      });
       vi.mocked(mockTransactionRepository.save).mockResolvedValue();
       vi.mocked(mockPortfolioRepository.upsertPosition).mockResolvedValue();
 
@@ -69,6 +75,11 @@ describe('ExecutePurchase Use Case', () => {
 
       // Verify vendor was called
       expect(mockStockVendorPort.getCurrentPrice).toHaveBeenCalledWith(symbol);
+      expect(mockStockVendorPort.executeBuy).toHaveBeenCalledWith({
+        symbol,
+        quantity,
+        price: requestedPrice,
+      });
 
       // Verify transaction was saved
       expect(mockTransactionRepository.save).toHaveBeenCalledWith(
@@ -96,6 +107,10 @@ describe('ExecutePurchase Use Case', () => {
       const price = 150.00;
 
       vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(price);
+      vi.mocked(mockStockVendorPort.executeBuy).mockResolvedValue({
+        success: true,
+        order: { symbol, quantity, price, total: price * quantity },
+      });
       vi.mocked(mockTransactionRepository.save).mockResolvedValue();
       vi.mocked(mockPortfolioRepository.upsertPosition).mockResolvedValue();
 
@@ -116,6 +131,10 @@ describe('ExecutePurchase Use Case', () => {
       const requestedPrice = 102.00; // Exactly at 2% above
 
       vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(currentPrice);
+      vi.mocked(mockStockVendorPort.executeBuy).mockResolvedValue({
+        success: true,
+        order: { symbol: 'AAPL', quantity: 10, price: requestedPrice, total: 1020 },
+      });
       vi.mocked(mockTransactionRepository.save).mockResolvedValue();
       vi.mocked(mockPortfolioRepository.upsertPosition).mockResolvedValue();
 
@@ -135,6 +154,10 @@ describe('ExecutePurchase Use Case', () => {
       const requestedPrice = 98.00; // Exactly at 2% below
 
       vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(currentPrice);
+      vi.mocked(mockStockVendorPort.executeBuy).mockResolvedValue({
+        success: true,
+        order: { symbol: 'AAPL', quantity: 10, price: requestedPrice, total: 980 },
+      });
       vi.mocked(mockTransactionRepository.save).mockResolvedValue();
       vi.mocked(mockPortfolioRepository.upsertPosition).mockResolvedValue();
 
@@ -178,6 +201,8 @@ describe('ExecutePurchase Use Case', () => {
         })
       );
 
+      // Verify vendor buy was NOT called
+      expect(mockStockVendorPort.executeBuy).not.toHaveBeenCalled();
       // Verify portfolio was NOT updated
       expect(mockPortfolioRepository.upsertPosition).not.toHaveBeenCalled();
     });
@@ -199,6 +224,7 @@ describe('ExecutePurchase Use Case', () => {
       expect(result.success).toBe(false);
       expect(result.transaction?.outcome).toBe(TransactionOutcome.FAILURE);
       expect(result.transaction?.reason).toContain('Price out of tolerance');
+      expect(mockStockVendorPort.executeBuy).not.toHaveBeenCalled();
       expect(mockPortfolioRepository.upsertPosition).not.toHaveBeenCalled();
     });
   });
@@ -269,6 +295,51 @@ describe('ExecutePurchase Use Case', () => {
       expect(result.success).toBe(false);
       expect(result.transaction?.outcome).toBe(TransactionOutcome.FAILURE);
       expect(result.transaction?.reason).toContain('timeout');
+      expect(mockPortfolioRepository.upsertPosition).not.toHaveBeenCalled();
+    });
+
+    it('should fail when vendor rejects the buy order', async () => {
+      const currentPrice = 150.00;
+      
+      vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(currentPrice);
+      vi.mocked(mockStockVendorPort.executeBuy).mockResolvedValue({
+        success: false,
+        message: 'Insufficient funds',
+      });
+      vi.mocked(mockTransactionRepository.save).mockResolvedValue();
+
+      const result = await executePurchase.execute({
+        userId: 'user123',
+        symbol: 'AAPL',
+        quantity: 10,
+        price: 150.00,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.transaction?.outcome).toBe(TransactionOutcome.FAILURE);
+      expect(result.transaction?.reason).toContain('Insufficient funds');
+      expect(mockPortfolioRepository.upsertPosition).not.toHaveBeenCalled();
+    });
+
+    it('should fail when vendor buy throws error', async () => {
+      const currentPrice = 150.00;
+      
+      vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(currentPrice);
+      vi.mocked(mockStockVendorPort.executeBuy).mockRejectedValue(
+        new Error('Vendor buy endpoint failed')
+      );
+      vi.mocked(mockTransactionRepository.save).mockResolvedValue();
+
+      const result = await executePurchase.execute({
+        userId: 'user123',
+        symbol: 'AAPL',
+        quantity: 10,
+        price: 150.00,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.transaction?.outcome).toBe(TransactionOutcome.FAILURE);
+      expect(result.error).toContain('Vendor buy endpoint failed');
       expect(mockPortfolioRepository.upsertPosition).not.toHaveBeenCalled();
     });
   });
@@ -351,6 +422,10 @@ describe('ExecutePurchase Use Case', () => {
   describe('transaction recording', () => {
     it('should always record transaction regardless of outcome', async () => {
       vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(100.00);
+      vi.mocked(mockStockVendorPort.executeBuy).mockResolvedValue({
+        success: true,
+        order: { symbol: 'AAPL', quantity: 10, price: 100.00, total: 1000 },
+      });
       vi.mocked(mockTransactionRepository.save).mockResolvedValue();
       vi.mocked(mockPortfolioRepository.upsertPosition).mockResolvedValue();
 
@@ -377,6 +452,10 @@ describe('ExecutePurchase Use Case', () => {
 
     it('should continue even if transaction save fails', async () => {
       vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(150.00);
+      vi.mocked(mockStockVendorPort.executeBuy).mockResolvedValue({
+        success: true,
+        order: { symbol: 'AAPL', quantity: 10, price: 150.00, total: 1500 },
+      });
       vi.mocked(mockTransactionRepository.save).mockRejectedValue(
         new Error('Database error')
       );
@@ -408,6 +487,7 @@ describe('ExecutePurchase Use Case', () => {
         price: 150.00, // Out of tolerance
       });
 
+      expect(mockStockVendorPort.executeBuy).not.toHaveBeenCalled();
       expect(mockPortfolioRepository.upsertPosition).not.toHaveBeenCalled();
     });
 
@@ -424,11 +504,35 @@ describe('ExecutePurchase Use Case', () => {
         price: 150.00,
       });
 
+      expect(mockStockVendorPort.executeBuy).not.toHaveBeenCalled();
+      expect(mockPortfolioRepository.upsertPosition).not.toHaveBeenCalled();
+    });
+
+    it('should not update portfolio if vendor buy fails', async () => {
+      vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(150.00);
+      vi.mocked(mockStockVendorPort.executeBuy).mockResolvedValue({
+        success: false,
+        message: 'Vendor rejected',
+      });
+      vi.mocked(mockTransactionRepository.save).mockResolvedValue();
+
+      const result = await executePurchase.execute({
+        userId: 'user123',
+        symbol: 'AAPL',
+        quantity: 10,
+        price: 150.00,
+      });
+
+      expect(result.success).toBe(false);
       expect(mockPortfolioRepository.upsertPosition).not.toHaveBeenCalled();
     });
 
     it('should rollback if portfolio update fails', async () => {
       vi.mocked(mockStockVendorPort.getCurrentPrice).mockResolvedValue(150.00);
+      vi.mocked(mockStockVendorPort.executeBuy).mockResolvedValue({
+        success: true,
+        order: { symbol: 'AAPL', quantity: 10, price: 150.00, total: 1500 },
+      });
       vi.mocked(mockTransactionRepository.save).mockResolvedValue();
       vi.mocked(mockPortfolioRepository.upsertPosition).mockRejectedValue(
         new Error('Database error')
