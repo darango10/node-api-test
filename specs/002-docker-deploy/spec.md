@@ -3,7 +3,7 @@
 **Feature Branch**: `002-docker-deploy`  
 **Created**: 2025-02-08  
 **Status**: Draft  
-**Input**: User description: "Desplegar servicio en un docker"
+**Input**: User description: "La api ya esta creada en la carpeta src/. Necesito desplegarla en un docker, para pruebas locales y dejar todo listo para despues desplegarla en la nube y poderla acceder desde cualquier parte del mundo, poder escalar, etc. Sigue las mejores practicas de arquitectura backend para desplegar en la nube en docker."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -55,6 +55,37 @@ As a deployer, I can configure the service (e.g. port, database URL, feature fla
 
 ---
 
+### User Story 4 - Run Locally for Testing (Priority: P2)
+
+As a developer or deployer, I can run the service in a container on my machine with minimal setup so that I can test the same artifact that will run in staging or production.
+
+**Why this priority**: Local container runs reduce environment drift and validate the image before cloud deployment.
+
+**Independent Test**: On a machine with the container runtime, run the documented command; the service responds to health and main API endpoints.
+
+**Acceptance Scenarios**:
+
+1. **Given** the built image and documented run command, **When** I start the container on my local machine with required env (e.g. port, test DB URL), **Then** the service is reachable and passes health checks.
+2. **Given** the running local container, **When** I call the same API endpoints as in production contract, **Then** behavior is consistent (same responses and status codes for the same inputs).
+
+---
+
+### User Story 5 - Deploy to Cloud and Scale (Priority: P3)
+
+As a deployer, I can run the same container image in a cloud environment so that the service is accessible from the internet and can be scaled (more instances) without changing the image or the application.
+
+**Why this priority**: Cloud deployment and horizontal scaling are the end goal; the image and run model must support them.
+
+**Independent Test**: Deploy the image to a cloud environment (or simulate with multiple containers); the service is reachable from outside and adding more instances increases capacity.
+
+**Acceptance Scenarios**:
+
+1. **Given** the container image and a cloud runtime, **When** I deploy with the same run/configuration approach as local, **Then** the service is reachable from the public internet (or designated network).
+2. **Given** the deployed service, **When** I add more instances behind a load balancer (or equivalent), **Then** traffic is distributed and the system handles more load without application or image changes.
+3. **Given** the service design, **When** multiple instances run, **Then** each instance is stateless or state is external (e.g. database), so scaling does not require session affinity or special handling for normal operation.
+
+---
+
 ### Edge Cases
 
 - What happens when the build runs without cache (e.g. first run or clean build)? Build MUST still complete and produce a valid image.
@@ -72,6 +103,8 @@ As a deployer, I can configure the service (e.g. port, database URL, feature fla
 - **FR-004**: The build process MUST be reproducible: the same source and build inputs MUST produce the same image (or a deterministic digest) when run repeatedly.
 - **FR-005**: The process running inside the container MUST handle graceful shutdown (e.g. SIGTERM) so that in-flight requests complete or timeout cleanly before exit.
 - **FR-006**: The image MUST be runnable with a single standard “run” command documented for deployers (e.g. which port to expose and which env vars are required).
+- **FR-007**: The same image MUST run identically in local and cloud environments with only configuration (env, ports) changes; no image variant or rebuild for cloud.
+- **FR-008**: The service MUST be suitable for horizontal scaling: multiple instances MUST be able to run behind a load balancer without application changes (stateless or external state only).
 
 ### Non-Functional Requirements (from Constitution)
 
@@ -110,10 +143,12 @@ As a deployer, I can configure the service (e.g. port, database URL, feature fla
 
 ## Assumptions
 
-- The existing service already exposes `/health` and `/metrics` and supports configuration via environment; the containerization layer does not change that contract.
-- The target runtime supports running containers (e.g. Docker or a compatible runtime); the spec does not mandate a specific vendor.
-- Build and run documentation will be provided (e.g. in README or docs) so that a new deployer can build and run without prior knowledge of the project.
+- The existing service (API in project source) already exposes `/health` and `/metrics` and supports configuration via environment; the containerization layer does not change that contract.
+- The target runtime supports running containers (e.g. Docker or a compatible runtime); the spec does not mandate a specific cloud vendor.
+- Build and run documentation will be provided (e.g. in README or docs) so that a new deployer can build and run locally and in the cloud without prior knowledge of the project.
 - One primary service per image is assumed; sidecars or multi-process layouts are out of scope unless explicitly added later.
+- The service is stateless or stores state only in external systems (e.g. database), so horizontal scaling by adding more instances is supported without code changes.
+- Cloud deployment (access from anywhere, scaling) is achieved by running the same image on a cloud provider; orchestration and networking details are environment-specific and out of scope for this spec except that the image and run model must support them.
 
 ## Success Criteria *(mandatory)*
 
@@ -123,3 +158,5 @@ As a deployer, I can configure the service (e.g. port, database URL, feature fla
 - **SC-002**: After starting the container with required configuration, the service passes the defined health check within 30 seconds.
 - **SC-003**: The same image runs successfully in at least two environments (e.g. local and CI, or local and staging) with only configuration changes (no rebuild).
 - **SC-004**: Stopping the container via the standard stop signal results in graceful shutdown (process exits after handling in-flight work or timeout) in 100% of normal runs.
+- **SC-005**: A deployer can run the image in a cloud environment and make the service reachable from the public internet using only documented configuration (no application or image changes).
+- **SC-006**: Deployers can increase capacity by running more instances of the same image (e.g. behind a load balancer); the system handles increased load without requiring code or image changes.
