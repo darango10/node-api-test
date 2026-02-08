@@ -1,0 +1,29 @@
+# node-api Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-02-06
+
+## Active Technologies
+
+- Node.js (LTS, e.g. 20.x) + Express (HTTP), Mongoose (MongoDB ODM), swagger-ui-express + openapi spec for docs (001-fuse-stock-trading-api)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+# Add commands for Node.js (LTS, e.g. 20.x)
+
+## Code Style
+
+Node.js (LTS, e.g. 20.x): Follow standard conventions
+
+## Recent Changes
+
+- 001-fuse-stock-trading-api: Added Node.js (LTS, e.g. 20.x) + Express (HTTP), Mongoose (MongoDB ODM), swagger-ui-express + openapi spec for docs
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->
