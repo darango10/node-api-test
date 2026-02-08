@@ -230,10 +230,10 @@ description: "Task list for Docker deployment implementation"
 - [ ] T106 [P] [US5] Document environment-specific configuration for cloud (secrets management)
 
 **Horizontal Scaling Validation**:
-- [ ] T107 [US5] Run multiple container instances locally: `docker run -d -p 3001:3000 ...` (instance 1)
-- [ ] T108 [US5] Run second instance: `docker run -d -p 3002:3000 ...` (instance 2)
-- [ ] T109 [US5] Verify both instances respond to health checks independently
-- [ ] T110 [US5] Verify instances don't share state (stateless design confirmed)
+- [X] T107 [US5] Run multiple container instances locally: `docker run -d -p 3001:3000 ...` (instance 1)
+- [X] T108 [US5] Run second instance: `docker run -d -p 3002:3000 ...` (instance 2)
+- [X] T109 [US5] Verify both instances respond to health checks independently
+- [X] T110 [US5] Verify instances don't share state (stateless design confirmed)
 
 **Cloud Configuration Verification**:
 - [ ] T111 [US5] Document external MongoDB connection string format for cloud
