@@ -51,7 +51,10 @@ docker-compose --version
 2. **Create environment file**:
    ```bash
    cp .env.example .env
-   # Edit .env if needed (default values work for local development)
+   # Edit .env: set VENDOR_API_URL and VENDOR_API_KEY so the vendor API works.
+   # Placeholder values cause 502 on /stocks and purchases. For local vendor on host use:
+   #   VENDOR_API_URL=http://host.docker.internal:4000
+   #   VENDOR_API_KEY=<your-vendor-api-key>
    ```
 
 3. **Start services**:
@@ -66,6 +69,9 @@ docker-compose --version
 ```bash
 # Check health endpoint
 curl http://localhost:3000/health
+
+# Verify vendor API (requires valid VENDOR_API_URL and VENDOR_API_KEY in .env)
+curl http://localhost:3000/stocks
 
 # View API documentation
 open http://localhost:3000/api-docs

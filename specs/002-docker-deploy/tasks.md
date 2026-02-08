@@ -164,6 +164,8 @@ description: "Task list for Docker deployment implementation"
 - API is reachable at http://localhost:3000
 - MongoDB data persists across restarts
 
+**Prerequisite – Vendor API**: For `/stocks` and purchases to work, `.env` must have valid `VENDOR_API_URL` and `VENDOR_API_KEY`. The app reads these from env (see `docker-compose.yml` and `.env.example`). Wrong or placeholder values cause 502 / "Failed to fetch price". For a local vendor on the host use `VENDOR_API_URL=http://host.docker.internal:4000` (and your vendor API key).
+
 ### Implementation for User Story 4
 
 **Docker Compose Setup**:
@@ -178,8 +180,9 @@ description: "Task list for Docker deployment implementation"
 
 **API Connectivity**:
 - [x] T076 [US4] Verify API health endpoint: `curl http://localhost:3000/health`
-- [x] T077 [US4] Verify API responds to stock listing: `curl http://localhost:3000/api/stocks`
+- [x] T077 [US4] Verify API responds to stock listing: `curl http://localhost:3000/stocks` (requires valid VENDOR_API_URL and VENDOR_API_KEY in .env)
 - [x] T078 [US4] Verify API logs show MongoDB connection success
+- [x] T077b [US4] Ensure vendor API works: set VENDOR_API_URL and VENDOR_API_KEY in .env per .env.example; docker-compose passes them via environment; verify `curl http://localhost:3000/stocks` returns 200 when vendor is reachable
 
 **MongoDB Connectivity**:
 - [x] T079 [US4] Verify MongoDB is accessible from app container

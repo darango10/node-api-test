@@ -30,6 +30,10 @@ services:
       PORT: 3000
       MONGODB_URI: mongodb://mongo:27017/stock-trading
       LOG_LEVEL: debug
+      # Vendor API: required for /stocks and purchases. Set in .env (VENDOR_API_URL, VENDOR_API_KEY).
+      # For local vendor on host use http://host.docker.internal:4000
+      VENDOR_API_URL: ${VENDOR_API_URL}
+      VENDOR_API_KEY: ${VENDOR_API_KEY}
     env_file:
       - .env
     depends_on:
