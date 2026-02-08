@@ -94,22 +94,22 @@ description: "Task list for Docker deployment implementation"
 ### Implementation for User Story 2
 
 **Single-Command Run**:
-- [ ] T030 [US2] Create .env file from .env.example for testing
-- [ ] T031 [US2] Start container: `docker run -d -p 3000:3000 --env-file .env --name api-test stock-trading-api:1.0.0`
-- [ ] T032 [US2] Verify container status is "running": `docker ps`
-- [ ] T033 [US2] Wait 40 seconds for startup period (allow MongoDB connection)
+- [x] T030 [US2] Create .env file from .env.example for testing
+- [x] T031 [US2] Start container: `docker run -d -p 3000:3000 --env-file .env --name api-test stock-trading-api:1.0.0`
+- [x] T032 [US2] Verify container status is "running": `docker ps`
+- [x] T033 [US2] Wait 40 seconds for startup period (allow MongoDB connection)
 
 **Health Check Validation**:
-- [ ] T034 [US2] Verify health endpoint responds: `curl http://localhost:3000/health`
-- [ ] T035 [US2] Verify metrics endpoint responds: `curl http://localhost:3000/metrics`
-- [ ] T036 [US2] Check container health status: `docker inspect --format='{{.State.Health.Status}}' api-test`
-- [ ] T037 [US2] Verify health status is "healthy" after startup period
+- [x] T034 [US2] Verify health endpoint responds: `curl http://localhost:3000/health`
+- [x] T035 [US2] Verify metrics endpoint responds: `curl http://localhost:3000/metrics`
+- [x] T036 [US2] Check container health status: `docker inspect --format='{{.State.Health.Status}}' api-test`
+- [x] T037 [US2] Verify health status is "healthy" after startup period
 
 **Graceful Shutdown**:
-- [ ] T038 [US2] Send stop signal: `docker stop api-test`
-- [ ] T039 [US2] Verify container stops within 30 seconds (no forced kill)
-- [ ] T040 [US2] Check logs for graceful shutdown message: `docker logs api-test`
-- [ ] T041 [US2] Remove test container: `docker rm api-test`
+- [x] T038 [US2] Send stop signal: `docker stop api-test`
+- [x] T039 [US2] Verify container stops within 30 seconds (no forced kill)
+- [x] T040 [US2] Check logs for graceful shutdown message: `docker logs api-test`
+- [x] T041 [US2] Remove test container: `docker rm api-test`
 
 **Checkpoint**: Single-command run works and service behavior matches non-containerized version.
 
@@ -129,25 +129,25 @@ description: "Task list for Docker deployment implementation"
 ### Implementation for User Story 3
 
 **Environment Configuration**:
-- [ ] T050 [US3] Run container with custom PORT: `docker run -d -p 4000:4000 -e PORT=4000 --env-file .env --name api-port-test stock-trading-api:1.0.0`
-- [ ] T051 [US3] Verify service responds on port 4000: `curl http://localhost:4000/health`
-- [ ] T052 [US3] Stop and remove container: `docker stop api-port-test && docker rm api-port-test`
+- [x] T050 [US3] Run container with custom PORT: `docker run -d -p 4000:4000 -e PORT=4000 --env-file .env --name api-port-test stock-trading-api:1.0.0`
+- [x] T051 [US3] Verify service responds on port 4000: `curl http://localhost:4000/health`
+- [x] T052 [US3] Stop and remove container: `docker stop api-port-test && docker rm api-port-test`
 
 **Configuration Validation**:
-- [ ] T053 [US3] Run container with missing required env var (remove MONGODB_URI from .env)
-- [ ] T054 [US3] Verify container fails fast with clear error message
-- [ ] T055 [US3] Check logs show validation error: `docker logs <container-id>`
+- [x] T053 [US3] Run container with missing required env var (remove MONGODB_URI from .env)
+- [x] T054 [US3] Verify container fails fast with clear error message
+- [x] T055 [US3] Check logs show validation error: `docker logs <container-id>`
 
 **Secret Safety**:
-- [ ] T056 [US3] Inspect image for secrets: `docker history stock-trading-api:1.0.0`
-- [ ] T057 [US3] Verify no .env files in image layers
-- [ ] T058 [US3] Verify no hardcoded API keys or passwords in image
+- [x] T056 [US3] Inspect image for secrets: `docker history stock-trading-api:1.0.0`
+- [x] T057 [US3] Verify no .env files in image layers
+- [x] T058 [US3] Verify no hardcoded API keys or passwords in image
 
 **Multi-Environment Simulation**:
-- [ ] T059 [US3] Create .env.dev and .env.prod with different configurations
-- [ ] T060 [US3] Run same image with .env.dev: `docker run --env-file .env.dev ...`
-- [ ] T061 [US3] Run same image with .env.prod: `docker run --env-file .env.prod ...`
-- [ ] T062 [US3] Verify both containers use their respective configurations
+- [x] T059 [US3] Create .env.dev and .env.prod with different configurations
+- [x] T060 [US3] Run same image with .env.dev: `docker run --env-file .env.dev ...`
+- [x] T061 [US3] Run same image with .env.prod: `docker run --env-file .env.prod ...`
+- [x] T062 [US3] Verify both containers use their respective configurations
 
 **Checkpoint**: Configuration external to image works correctly; same image is environment-agnostic.
 
@@ -167,36 +167,36 @@ description: "Task list for Docker deployment implementation"
 ### Implementation for User Story 4
 
 **Docker Compose Setup**:
-- [ ] T070 [US4] Verify docker-compose.yml exists at repository root
-- [ ] T071 [US4] Verify docker-compose.yml defines app and mongo services
-- [ ] T072 [US4] Verify docker-compose.yml uses named volumes for MongoDB persistence
+- [x] T070 [US4] Verify docker-compose.yml exists at repository root
+- [x] T071 [US4] Verify docker-compose.yml defines app and mongo services
+- [x] T072 [US4] Verify docker-compose.yml uses named volumes for MongoDB persistence
 
 **Local Stack Startup**:
-- [ ] T073 [US4] Start services: `docker-compose up -d`
-- [ ] T074 [US4] Verify both containers are running: `docker-compose ps`
-- [ ] T075 [US4] Wait for services to be healthy (check docker-compose ps STATUS column)
+- [x] T073 [US4] Start services: `docker-compose up -d`
+- [x] T074 [US4] Verify both containers are running: `docker-compose ps`
+- [x] T075 [US4] Wait for services to be healthy (check docker-compose ps STATUS column)
 
 **API Connectivity**:
-- [ ] T076 [US4] Verify API health endpoint: `curl http://localhost:3000/health`
-- [ ] T077 [US4] Verify API responds to stock listing: `curl http://localhost:3000/api/stocks`
-- [ ] T078 [US4] Verify API logs show MongoDB connection success
+- [x] T076 [US4] Verify API health endpoint: `curl http://localhost:3000/health`
+- [x] T077 [US4] Verify API responds to stock listing: `curl http://localhost:3000/api/stocks`
+- [x] T078 [US4] Verify API logs show MongoDB connection success
 
 **MongoDB Connectivity**:
-- [ ] T079 [US4] Verify MongoDB is accessible from app container
-- [ ] T080 [US4] Verify app container can resolve `mongo` hostname (Docker DNS)
-- [ ] T081 [US4] Optional: Connect to MongoDB with Compass (mongodb://localhost:27017)
+- [x] T079 [US4] Verify MongoDB is accessible from app container
+- [x] T080 [US4] Verify app container can resolve `mongo` hostname (Docker DNS)
+- [x] T081 [US4] Optional: Connect to MongoDB with Compass (mongodb://localhost:27017)
 
 **Data Persistence**:
-- [ ] T082 [US4] Create test data via API (POST /api/stocks or similar)
-- [ ] T083 [US4] Stop services: `docker-compose down`
-- [ ] T084 [US4] Start services again: `docker-compose up -d`
-- [ ] T085 [US4] Verify test data still exists (GET /api/stocks)
+- [x] T082 [US4] Create test data via API (POST /api/stocks or similar)
+- [x] T083 [US4] Stop services: `docker-compose down`
+- [x] T084 [US4] Start services again: `docker-compose up -d`
+- [x] T085 [US4] Verify test data still exists (GET /api/stocks)
 
 **Developer Workflow**:
-- [ ] T086 [US4] Make a code change in src/
-- [ ] T087 [US4] Rebuild and restart: `docker-compose up --build`
-- [ ] T088 [US4] Verify new code is running (check logs or behavior)
-- [ ] T089 [US4] Stop all services: `docker-compose down`
+- [x] T086 [US4] Make a code change in src/
+- [x] T087 [US4] Rebuild and restart: `docker-compose up --build`
+- [x] T088 [US4] Verify new code is running (check logs or behavior)
+- [x] T089 [US4] Stop all services: `docker-compose down`
 
 **Checkpoint**: Local development environment matches production behavior; developers can test with one command.
 

@@ -10,8 +10,7 @@
 #   View logs:          docker-compose logs -f app
 #   Reset database:     docker-compose down -v
 # =============================================================================
-
-version: '3.8'
+# Note: 'version' is obsolete in Docker Compose V2 and is ignored.
 
 services:
   # ---------------------------------------------------------------------------

@@ -55,6 +55,10 @@ COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/package.json ./package.json
 
+# Copy non-TypeScript assets (YAML, JSON, etc.) from source
+# These are needed by the application at runtime
+COPY --from=builder --chown=node:node /app/src/infrastructure/http/openapi.yaml ./src/infrastructure/http/openapi.yaml
+
 # Switch to non-root user (security best practice)
 # The node user is pre-configured in the official Node.js image (UID 1000)
 USER node
@@ -75,4 +79,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 # Application has graceful shutdown handlers (SIGTERM/SIGINT)
 # Set v8 max heap size to 90% of container memory limit (prevents OOM)
 # For 512MB container: --max-old-space-size=460
-CMD ["node", "--max-old-space-size=460", "dist/index.js"]
+CMD ["node", "--max-old-space-size=460", "dist/src/index.js"]
