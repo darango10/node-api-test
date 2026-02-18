@@ -1,16 +1,30 @@
 import rateLimit from 'express-rate-limit';
 
+const generalWindowMs = process.env.RATE_LIMIT_WINDOW_MS
+  ? Number(process.env.RATE_LIMIT_WINDOW_MS)
+  : 15 * 60 * 1000; // 15 minutes
+const generalMax = process.env.RATE_LIMIT_MAX
+  ? Number(process.env.RATE_LIMIT_MAX)
+  : 100;
+
 export const generalRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: generalWindowMs,
+  max: generalMax,
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many requests, please try again later',
 });
 
+const purchaseWindowMs = process.env.PURCHASE_RATE_LIMIT_WINDOW_MS
+  ? Number(process.env.PURCHASE_RATE_LIMIT_WINDOW_MS)
+  : 60 * 1000; // 1 minute
+const purchaseMax = process.env.PURCHASE_RATE_LIMIT_MAX
+  ? Number(process.env.PURCHASE_RATE_LIMIT_MAX)
+  : 10;
+
 export const purchaseRateLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 10, // Limit to 10 purchase requests per minute
+  windowMs: purchaseWindowMs,
+  max: purchaseMax,
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many purchase requests, please try again later',

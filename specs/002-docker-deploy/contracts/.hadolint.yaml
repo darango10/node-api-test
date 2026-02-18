@@ -1,0 +1,40 @@
+# =============================================================================
+# Hadolint Configuration
+# =============================================================================
+# Linting rules for Dockerfile following best practices.
+# See: https://github.com/hadolint/hadolint
+#
+# Usage:
+#   docker run --rm -i hadolint/hadolint < Dockerfile
+#   OR: hadolint Dockerfile
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Ignored Rules
+# -----------------------------------------------------------------------------
+# Rules that are intentionally disabled with justification
+ignored:
+  # DL3059: Multiple consecutive RUN commands should be combined
+  # Justification: We prefer separate RUN commands in multi-stage builds for
+  # clarity and better layer caching. Each RUN serves a distinct purpose.
+  - DL3059
+
+# -----------------------------------------------------------------------------
+# Trusted Docker Registries
+# -----------------------------------------------------------------------------
+# Only allow base images from these registries (security measure)
+trustedRegistries:
+  - docker.io        # Official Docker Hub (node:20-alpine)
+
+# -----------------------------------------------------------------------------
+# Warning Thresholds
+# -----------------------------------------------------------------------------
+# Fail build if violations exceed these thresholds
+failure-threshold: error  # Fail on error-level issues only (not warnings)
+
+# -----------------------------------------------------------------------------
+# Style Rules
+# -----------------------------------------------------------------------------
+# Maximum line length for Dockerfile instructions
+# Helps maintain readability
+strict-labels: false  # Don't require OCI labels (optional for internal use)
