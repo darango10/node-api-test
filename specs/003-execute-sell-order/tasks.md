@@ -19,7 +19,7 @@
 
 **Purpose**: Confirm feature context; no new project initialization.
 
-- [ ] T001 Verify feature branch and design docs (plan.md, spec.md, data-model.md, contracts/) at specs/003-execute-sell-order/
+- [x] T001 Verify feature branch and design docs (plan.md, spec.md, data-model.md, contracts/) at specs/003-execute-sell-order/
 
 ---
 
@@ -29,8 +29,8 @@
 
 **⚠️ CRITICAL**: User Story 1 implementation cannot start until this phase is complete.
 
-- [ ] T002 Add reducePosition(userId: string, symbol: string, quantity: number): Promise<void> to PortfolioRepositoryPort in src/ports/repositories/portfolio-repository.port.ts (semantics: atomic reduce; throws on insufficient shares with currentHeldQuantity)
-- [ ] T003 Add InsufficientSharesError class (extends AppError, statusCode 400, property currentHeldQuantity: number) in src/domain/errors/index.ts (or src/domain/errors/insufficient-shares.error.ts and export from index)
+- [x] T002 Add reducePosition(userId: string, symbol: string, quantity: number): Promise<void> to PortfolioRepositoryPort in src/ports/repositories/portfolio-repository.port.ts (semantics: atomic reduce; throws on insufficient shares with currentHeldQuantity)
+- [x] T003 Add InsufficientSharesError class (extends AppError, statusCode 400, property currentHeldQuantity: number) in src/domain/errors/index.ts (or src/domain/errors/insufficient-shares.error.ts and export from index)
 
 ---
 

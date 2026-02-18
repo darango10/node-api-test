@@ -46,3 +46,12 @@ export class ExternalServiceError extends AppError {
     super(message, statusCode, true);
   }
 }
+
+export class InsufficientSharesError extends AppError {
+  public readonly currentHeldQuantity: number;
+
+  constructor(message: string, currentHeldQuantity: number) {
+    super(message, 400, true);
+    this.currentHeldQuantity = currentHeldQuantity;
+  }
+}
