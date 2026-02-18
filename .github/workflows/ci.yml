@@ -1,0 +1,104 @@
+# =============================================================================
+# CI Pipeline - Stock Trading API
+# =============================================================================
+# Runs on every push and pull request. Fail-fast: lint → test → Dockerfile lint
+# → build image → security scan. No secrets in image; all config via env at runtime.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+env:
+  NODE_VERSION: "20"
+  IMAGE_NAME: stock-trading-api
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Lint and unit/integration tests (fast feedback)
+  # ---------------------------------------------------------------------------
+  lint-and-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run tests with coverage
+        run: npm run coverage
+        env:
+          # Tests may need env; avoid leaking real secrets
+          MONGODB_URI: mongodb://localhost:27017/test
+          VENDOR_API_URL: https://example.com
+          VENDOR_API_KEY: test-key
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Dockerfile lint and image build + security scan
+  # ---------------------------------------------------------------------------
+  docker:
+    name: Docker build & scan
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Lint Dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          config: .hadolint.yaml
+          failure-threshold: error
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: os,library
+
+      - name: Run Trivy config scan (container best practices)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          scanners: config
+          format: table
+          exit-code: "1"
