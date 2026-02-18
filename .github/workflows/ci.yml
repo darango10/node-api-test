@@ -7,11 +7,12 @@
 
 name: CI
 
+# Gitflow: CI on main (production), develop (integration), and any PR targeting them.
 on:
   push:
-    branches: [master, main]
+    branches: [master, main, develop]
   pull_request:
-    branches: [master, main]
+    branches: [master, main, develop]
 
 env:
   NODE_VERSION: "20"

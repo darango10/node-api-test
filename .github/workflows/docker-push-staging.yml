@@ -1,25 +1,25 @@
 # =============================================================================
-# Docker build and push (main only = production; optional develop = staging)
+# Docker push - Staging (develop branch only)
 # =============================================================================
-# Production: push only when CI succeeds on main/master. No push on broken main.
-# Staging: optional push on develop with tag "staging" (uncomment job if needed).
+# Optional. Pushes image with tag "staging" when CI passes on develop.
+# Disable by removing this file or the trigger branches.
 # =============================================================================
 
-name: Docker push
+name: Docker push (staging)
 
 on:
   workflow_run:
     workflows: [CI]
     types: [completed]
-    branches: [master, main]
+    branches: [develop]
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push:
-    name: Build and push image
+  build-and-push-staging:
+    name: Build and push staging image
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
@@ -48,7 +48,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=sha,prefix=
-            type=raw,value=latest
+            type=raw,value=staging
 
       - name: Build and push
         uses: docker/build-push-action@v6
