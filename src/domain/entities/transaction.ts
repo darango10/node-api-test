@@ -9,7 +9,12 @@ export enum TransactionOutcome {
 }
 
 /**
- * Transaction entity representing a purchase attempt
+ * Transaction type for reporting (purchase vs sell)
+ */
+export type TransactionType = 'purchase' | 'sell';
+
+/**
+ * Transaction entity representing a purchase or sell attempt
  * Immutable record of each transaction (success or failure)
  */
 export class Transaction {
@@ -20,6 +25,7 @@ export class Transaction {
   public readonly outcome: TransactionOutcome;
   public readonly reason?: string;
   public readonly createdAt: Date;
+  public readonly type?: TransactionType;
 
   constructor(
     userId: string,
@@ -28,7 +34,8 @@ export class Transaction {
     price: number,
     outcome: TransactionOutcome,
     reason?: string,
-    createdAt?: Date
+    createdAt?: Date,
+    type?: TransactionType
   ) {
     // Validate userId
     if (!userId || userId.trim() === '') {
@@ -57,6 +64,7 @@ export class Transaction {
     this.outcome = outcome;
     this.reason = reason;
     this.createdAt = createdAt || new Date();
+    this.type = type;
 
     // Freeze to ensure immutability
     Object.freeze(this);
@@ -73,6 +81,7 @@ export class Transaction {
     outcome: string;
     reason?: string;
     createdAt: Date;
+    type?: TransactionType;
   } {
     return {
       userId: this.userId,
@@ -82,6 +91,7 @@ export class Transaction {
       outcome: this.outcome,
       reason: this.reason,
       createdAt: this.createdAt,
+      ...(this.type && { type: this.type }),
     };
   }
 }

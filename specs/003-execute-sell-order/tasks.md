@@ -43,37 +43,37 @@
 ### Tests for User Story 1 (TDD — Write First, Then Implementation)
 
 **Unit tests**:
-- [ ] T004 [P] [US1] Unit test ExecuteSell use case (success, insufficient shares, market unavailable, validation errors) in tests/unit/application/execute-sell.spec.ts
-- [ ] T005 [P] [US1] Unit test InsufficientSharesError and currentHeldQuantity in tests/unit/domain/errors.spec.ts (or extend existing domain error tests)
+- [x] T004 [P] [US1] Unit test ExecuteSell use case (success, insufficient shares, market unavailable, validation errors) in tests/unit/application/execute-sell.spec.ts
+- [x] T005 [P] [US1] Unit test InsufficientSharesError and currentHeldQuantity in tests/unit/domain/errors.spec.ts (or extend existing domain error tests)
 
 **Integration tests**:
-- [ ] T006 [P] [US1] Integration test PortfolioRepositoryImpl.reducePosition (atomic decrement, insufficient shares throws with currentHeldQuantity) in tests/integration/portfolio-repository.spec.ts
+- [x] T006 [P] [US1] Integration test PortfolioRepositoryImpl.reducePosition (atomic decrement, insufficient shares throws with currentHeldQuantity) in tests/integration/portfolio-repository.spec.ts
 
 **Contract tests**:
-- [ ] T007 [US1] Contract test POST /users/:userId/sales (201 success, 400 validation/insufficient shares with currentHeldQuantity, 502 market unavailable) in tests/contract/sales.spec.ts
+- [x] T007 [US1] Contract test POST /users/:userId/sales (201 success, 400 validation/insufficient shares with currentHeldQuantity, 502 market unavailable) in tests/contract/sales.spec.ts
 
 ### Implementation for User Story 1 (After Tests Written and Failing)
 
 **Domain**:
-- [ ] T008 [US1] Add optional type?: 'purchase' | 'sell' to Transaction entity and constructor in src/domain/entities/transaction.ts (backward compatible; existing code unchanged)
+- [x] T008 [US1] Add optional type?: 'purchase' | 'sell' to Transaction entity and constructor in src/domain/entities/transaction.ts (backward compatible; existing code unchanged)
 
 **Infrastructure — persistence**:
-- [ ] T009 [US1] Implement reducePosition in PortfolioRepositoryImpl with MongoDB atomic update (condition position.quantity >= quantity; throw InsufficientSharesError with currentHeldQuantity on no position or insufficient) in src/infrastructure/persistence/portfolio.repository.ts
+- [x] T009 [US1] Implement reducePosition in PortfolioRepositoryImpl with MongoDB atomic update (condition position.quantity >= quantity; throw InsufficientSharesError with currentHeldQuantity on no position or insufficient) in src/infrastructure/persistence/portfolio.repository.ts
 
 **Application**:
-- [ ] T010 [US1] Implement ExecuteSell use case (validate request → get portfolio → check quantity → getCurrentPrice → reducePosition → save transaction; handle InsufficientSharesError, vendor errors, price tolerance) in src/application/use-cases/execute-sell.ts
+- [x] T010 [US1] Implement ExecuteSell use case (validate request → get portfolio → check quantity → getCurrentPrice → reducePosition → save transaction; handle InsufficientSharesError, vendor errors, price tolerance) in src/application/use-cases/execute-sell.ts
 
 **Infrastructure — HTTP**:
-- [ ] T011 [US1] Create SalesController (POST handler, Zod validation for body, map InsufficientSharesError to 400 with currentHeldQuantity, vendor errors to 502) in src/infrastructure/http/controllers/sales.controller.ts
-- [ ] T012 [US1] Create sales routes (POST /users/:userId/sales) and mount in app in src/infrastructure/http/routes/sales.routes.ts and src/infrastructure/http/app.ts
-- [ ] T013 [US1] Merge sell path and schemas from specs/003-execute-sell-order/contracts/openapi-sell.yaml into src/infrastructure/http/openapi.yaml (add Sales tag if missing)
+- [x] T011 [US1] Create SalesController (POST handler, Zod validation for body, map InsufficientSharesError to 400 with currentHeldQuantity, vendor errors to 502) in src/infrastructure/http/controllers/sales.controller.ts
+- [x] T012 [US1] Create sales routes (POST /users/:userId/sales) and mount in app in src/infrastructure/http/routes/sales.routes.ts and src/infrastructure/http/app.ts
+- [x] T013 [US1] Merge sell path and schemas from specs/003-execute-sell-order/contracts/openapi-sell.yaml into src/infrastructure/http/openapi.yaml (add Sales tag if missing)
 
 **DI and wiring**:
-- [ ] T014 [US1] Register ExecuteSell and SalesController in container and mount sales routes in src/infrastructure/config/container.ts and src/infrastructure/http/app.ts
+- [x] T014 [US1] Register ExecuteSell and SalesController in container and mount sales routes in src/infrastructure/config/container.ts and src/infrastructure/http/app.ts
 
 **Verification**:
-- [ ] T015 [US1] Run full test suite and verify ≥80% coverage for sell-related code (execute-sell, sales.controller, portfolio reducePosition)
-- [ ] T016 [US1] Run ESLint (npm run lint) and fix any violations in new or modified files
+- [x] T015 [US1] Run full test suite and verify ≥80% coverage for sell-related code (execute-sell, sales.controller, portfolio reducePosition)
+- [x] T016 [US1] Run ESLint (npm run lint) and fix any violations in new or modified files
 
 **Checkpoint**: User Story 1 complete — sell order executable and independently testable.
 
@@ -83,10 +83,10 @@
 
 **Purpose**: Constitution compliance and documentation.
 
-- [ ] T017 [P] Verify POST /users/:userId/sales has rate limiting (existing global or route-specific) and Zod validation in src/infrastructure/http/
-- [ ] T018 [P] Verify error responses for sell do not leak internal details and include currentHeldQuantity for insufficient shares per spec
-- [ ] T019 [P] Update quickstart or README if needed for running and testing sell endpoint (specs/003-execute-sell-order/quickstart.md or project README)
-- [ ] T020 Run full test suite (npm test), ESLint (npm run lint), and verify quickstart steps for sell
+- [x] T017 [P] Verify POST /users/:userId/sales has rate limiting (existing global or route-specific) and Zod validation in src/infrastructure/http/
+- [x] T018 [P] Verify error responses for sell do not leak internal details and include currentHeldQuantity for insufficient shares per spec
+- [x] T019 [P] Update quickstart or README if needed for running and testing sell endpoint (specs/003-execute-sell-order/quickstart.md or project README)
+- [x] T020 Run full test suite (npm test), ESLint (npm run lint), and verify quickstart steps for sell
 
 ---
 

@@ -1,6 +1,6 @@
 import { Portfolio, Position } from '../../domain/entities/portfolio';
 import { PortfolioRepositoryPort } from '../../ports/repositories/portfolio-repository.port';
-import { ValidationError } from '../../domain/errors';
+import { ValidationError, InsufficientSharesError } from '../../domain/errors';
 import { PortfolioModel } from './models/portfolio.model';
 
 /**
@@ -103,6 +103,51 @@ export class PortfolioRepositoryImpl implements PortfolioRepositoryPort {
           throw error;
         }
       }
+    }
+  }
+
+  /**
+   * Atomically reduce position by quantity. Throws InsufficientSharesError if no position or insufficient shares.
+   */
+  async reducePosition(
+    userId: string,
+    symbol: string,
+    quantity: number
+  ): Promise<void> {
+    if (!userId || userId.trim() === '') {
+      throw new ValidationError('UserId cannot be empty');
+    }
+    if (!symbol || symbol.trim() === '') {
+      throw new ValidationError('Symbol cannot be empty');
+    }
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      throw new ValidationError('Quantity must be a positive integer');
+    }
+
+    const portfolio = await this.getByUserId(userId);
+    const position = portfolio?.findPosition(symbol);
+    const currentHeld = position?.quantity ?? 0;
+
+    if (currentHeld < quantity) {
+      throw new InsufficientSharesError(
+        `Insufficient shares: you have ${currentHeld}, requested ${quantity}`,
+        currentHeld
+      );
+    }
+
+    const result = await PortfolioModel.updateOne(
+      { userId, 'positions.symbol': symbol, 'positions.quantity': { $gte: quantity } },
+      { $inc: { 'positions.$.quantity': -quantity }, $set: { updatedAt: new Date() } }
+    );
+
+    if (result.matchedCount === 0) {
+      const actualPortfolio = await this.getByUserId(userId);
+      const actualPosition = actualPortfolio?.findPosition(symbol);
+      const actualHeld = actualPosition?.quantity ?? 0;
+      throw new InsufficientSharesError(
+        `Insufficient shares: you have ${actualHeld}, requested ${quantity}`,
+        actualHeld
+      );
     }
   }
 }

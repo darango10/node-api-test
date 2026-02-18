@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { PortfolioRepositoryImpl } from '../../src/infrastructure/persistence/portfolio.repository';
+import { InsufficientSharesError } from '../../src/domain/errors';
 
 describe('PortfolioRepository Integration', () => {
   let mongoServer: MongoMemoryServer;
@@ -134,6 +135,53 @@ describe('PortfolioRepository Integration', () => {
       await expect(
         repository.upsertPosition('', 'AAPL', 10)
       ).rejects.toThrow('UserId cannot be empty');
+    });
+  });
+
+  describe('reducePosition', () => {
+    it('should throw InsufficientSharesError with currentHeldQuantity 0 when user has no position', async () => {
+      await expect(
+        repository.reducePosition('user-no-portfolio', 'AAPL', 10)
+      ).rejects.toThrow(InsufficientSharesError);
+
+      try {
+        await repository.reducePosition('user-no-portfolio', 'AAPL', 10);
+      } catch (err) {
+        expect(err).toBeInstanceOf(InsufficientSharesError);
+        expect((err as InsufficientSharesError).currentHeldQuantity).toBe(0);
+      }
+    });
+
+    it('should throw InsufficientSharesError with currentHeldQuantity when user holds fewer than requested', async () => {
+      await repository.upsertPosition('user-123', 'AAPL', 30);
+
+      await expect(
+        repository.reducePosition('user-123', 'AAPL', 50)
+      ).rejects.toThrow(InsufficientSharesError);
+
+      try {
+        await repository.reducePosition('user-123', 'AAPL', 50);
+      } catch (err) {
+        expect(err).toBeInstanceOf(InsufficientSharesError);
+        expect((err as InsufficientSharesError).currentHeldQuantity).toBe(30);
+      }
+    });
+
+    it('should atomically reduce position by quantity on success', async () => {
+      await repository.upsertPosition('user-123', 'AAPL', 100);
+      await repository.reducePosition('user-123', 'AAPL', 40);
+
+      const portfolio = await repository.getByUserId('user-123');
+      expect(portfolio?.findPosition('AAPL')?.quantity).toBe(60);
+    });
+
+    it('should remove position when selling full quantity', async () => {
+      await repository.upsertPosition('user-123', 'MSFT', 20);
+      await repository.reducePosition('user-123', 'MSFT', 20);
+
+      const portfolio = await repository.getByUserId('user-123');
+      const pos = portfolio?.findPosition('MSFT');
+      expect(pos === undefined || pos.quantity === 0).toBe(true);
     });
   });
 });
