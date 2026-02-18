@@ -2,21 +2,19 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { Express } from 'express';
 import { createApp } from '../../src/infrastructure/http/app';
-import { connectDB, disconnectDB } from '../../src/infrastructure/persistence/mongo-connection';
+import { connectDatabase, disconnectDatabase } from '../../src/infrastructure/persistence/mongo-connection';
 
 describe('E2E: List Stocks Flow', () => {
   let app: Express;
 
   beforeAll(async () => {
-    // Connect to test database
-    await connectDB(process.env.MONGODB_URI || 'mongodb://localhost:27017/stock-trading-test');
-    
-    // Create application
-    app = await createApp();
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/stock-trading-test';
+    await connectDatabase(uri);
+    app = createApp();
   });
 
   afterAll(async () => {
-    await disconnectDB();
+    await disconnectDatabase();
   });
 
   describe('should complete full list stocks journey', () => {

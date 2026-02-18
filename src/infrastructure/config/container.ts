@@ -8,6 +8,7 @@ import { GetPortfolio } from '../../application/use-cases/get-portfolio';
 import { TransactionRepositoryImpl } from '../persistence/transaction.repository';
 import { TransactionRepositoryPort } from '../../ports/repositories/transaction-repository.port';
 import { ExecutePurchase } from '../../application/use-cases/execute-purchase';
+import { ExecuteSell } from '../../application/use-cases/execute-sell';
 
 /**
  * Dependency injection container / factory for ports.
@@ -22,6 +23,7 @@ export interface Container {
   listStocksUseCase: ListStocks;
   getPortfolioUseCase: GetPortfolio;
   executePurchaseUseCase: ExecutePurchase;
+  executeSellUseCase: ExecuteSell;
 }
 
 /**
@@ -50,6 +52,12 @@ export function createContainer(): Container {
     transactionRepository
   );
 
+  const executeSellUseCase = new ExecuteSell(
+    stockVendorPort,
+    portfolioRepository,
+    transactionRepository
+  );
+
   return {
     stockVendorPort,
     portfolioRepository,
@@ -57,5 +65,6 @@ export function createContainer(): Container {
     listStocksUseCase,
     getPortfolioUseCase,
     executePurchaseUseCase,
+    executeSellUseCase,
   };
 }

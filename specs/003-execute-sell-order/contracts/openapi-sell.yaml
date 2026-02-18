@@ -1,0 +1,112 @@
+# OpenAPI fragment: Execute Sell Order
+# Merge this into src/infrastructure/http/openapi.yaml
+# Path: POST /users/{userId}/sales
+
+paths:
+  /users/{userId}/sales:
+    post:
+      tags: [Sales]
+      summary: Execute market sell order
+      description: |
+        Submits a sell order for the given user. Validates that the user holds at least
+        the requested quantity, that the market is available, and that the execution price
+        is within the allowed tolerance. On success, portfolio is updated locally and
+        the transaction is recorded. Vendor is used only for current price; no vendor sell API.
+      operationId: executeSell
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: User identifier
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SellRequest'
+      responses:
+        '201':
+          description: Sell executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellResponse'
+        '400':
+          description: |
+            Validation error, insufficient shares, or price out of tolerance.
+            For insufficient shares, response MUST include currentHeldQuantity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellErrorResponse'
+        '502':
+          description: Market unavailable or vendor error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    SellRequest:
+      type: object
+      required: [symbol, quantity]
+      properties:
+        symbol:
+          type: string
+          minLength: 1
+          description: Stock symbol to sell
+        quantity:
+          type: integer
+          minimum: 1
+          description: Number of whole shares to sell (positive integer only)
+
+    SellResponse:
+      type: object
+      required: [success, message, transaction]
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Sell executed successfully
+        transaction:
+          type: object
+          description: Record of the sell transaction (symbol, quantity, price, outcome)
+          properties:
+            userId:
+              type: string
+            symbol:
+              type: string
+            quantity:
+              type: integer
+            price:
+              type: number
+            outcome:
+              type: string
+              enum: [success]
+            createdAt:
+              type: string
+              format: date-time
+
+    SellErrorResponse:
+      type: object
+      description: Error response; for insufficient shares, currentHeldQuantity is required
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Optional machine-readable code (e.g. INSUFFICIENT_SHARES, PRICE_OUT_OF_TOLERANCE, MARKET_UNAVAILABLE)
+        currentHeldQuantity:
+          type: integer
+          minimum: 0
+          description: Required when error is insufficient shares; 0 if user has no position
