@@ -7,6 +7,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-06
 - MongoDB (external dependency, connection via MONGODB_URI env var) (002-docker-deploy)
 - Node.js ≥20, TypeScript 5.6 + Express 4.x, Mongoose 8.x, Zod 3.x, Pino, Vites (003-execute-sell-order)
 - MongoDB (existing portfolio and transaction collections) (003-execute-sell-order)
+- TypeScript 5.6 / Node.js ≥20 + Express 4.x, existing stack (pino, zod, mongoose); add WebSocket library (see research.md) (004-websocket-stock-events)
+- MongoDB (existing); events are not persisted (best-effort push only) (004-websocket-stock-events)
 
 - Node.js (LTS, e.g. 20.x) + Express (HTTP), Mongoose (MongoDB ODM), swagger-ui-express + openapi spec for docs (001-fuse-stock-trading-api)
 
@@ -26,10 +28,10 @@ tests/
 Node.js (LTS, e.g. 20.x): Follow standard conventions
 
 ## Recent Changes
+- 004-websocket-stock-events: Added TypeScript 5.6 / Node.js ≥20 + Express 4.x, existing stack (pino, zod, mongoose); add WebSocket library (see research.md)
 - 003-execute-sell-order: Added Node.js ≥20, TypeScript 5.6 + Express 4.x, Mongoose 8.x, Zod 3.x, Pino, Vites
 - 002-docker-deploy: Added Node.js >=20.0.0, TypeScript 5.6 + Express 4.21, Mongoose 8.8, Zod 3.23, Pino 9.5, Helmet 7.1, express-rate-limit 7.4
 
-- 001-fuse-stock-trading-api: Added Node.js (LTS, e.g. 20.x) + Express (HTTP), Mongoose (MongoDB ODM), swagger-ui-express + openapi spec for docs
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
