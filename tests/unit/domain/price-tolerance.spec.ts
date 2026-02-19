@@ -1,4 +1,4 @@
-import { isWithinTolerance } from '../../../src/domain/services/price-tolerance';
+import { isWithinTolerance } from '../../../src/features/shared/domain/services/price-tolerance';
 
 describe('Price Tolerance Service', () => {
   describe('isWithinTolerance', () => {
@@ -52,13 +52,13 @@ describe('Price Tolerance Service', () => {
 
     it('should handle different tolerance percentages', () => {
       const currentPrice = 100;
-      
+
       // 5% tolerance: 95 - 105
       expect(isWithinTolerance(94, currentPrice, 0.05)).toBe(false);
       expect(isWithinTolerance(95, currentPrice, 0.05)).toBe(true);
       expect(isWithinTolerance(105, currentPrice, 0.05)).toBe(true);
       expect(isWithinTolerance(106, currentPrice, 0.05)).toBe(false);
-      
+
       // 1% tolerance: 99 - 101
       expect(isWithinTolerance(98.5, currentPrice, 0.01)).toBe(false);
       expect(isWithinTolerance(99, currentPrice, 0.01)).toBe(true);

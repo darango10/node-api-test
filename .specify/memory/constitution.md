@@ -48,14 +48,31 @@
 **Structure Enforcement**:
 ```
 src/
-├── domain/           # Business logic, entities, domain services (NO external deps)
-├── application/      # Use cases, application services (depends on domain only)
-├── infrastructure/   # Adapters: DB, HTTP, external APIs, file system
-│   ├── http/        # Express routes, controllers
-│   ├── persistence/ # Database implementations
-│   └── external/    # Third-party integrations
-└── ports/           # Interfaces/contracts (domain → infrastructure)
+├── features/         # Vertical slices organized by business capability
+│   ├── stocks/       # Stock listing feature
+│   │   ├── domain/           # Stock entities, domain logic
+│   │   ├── application/      # ListStocks use case
+│   │   ├── infrastructure/   # Stock vendor adapter, controllers, routes
+│   │   └── ports/            # StockVendorPort interface
+│   ├── portfolio/    # Portfolio management feature
+│   │   ├── domain/           # Portfolio entities
+│   │   ├── application/      # GetPortfolio use case
+│   │   ├── infrastructure/   # Portfolio repository, controllers, routes
+│   │   └── ports/            # PortfolioRepositoryPort interface
+│   ├── purchases/    # Purchase execution feature
+│   │   ├── application/      # ExecutePurchase use case
+│   │   └── infrastructure/   # Purchase controllers, routes
+│   ├── sales/        # Sales execution feature
+│   │   ├── application/      # ExecuteSell use case
+│   │   └── infrastructure/   # Sales controllers, routes
+│   └── shared/       # Shared components across features
+│       ├── domain/           # Shared entities (Transaction), errors, services
+│       ├── infrastructure/   # Config, persistence, HTTP middleware
+│       └── ports/            # Shared port interfaces
+└── index.ts          # Application entry point
 ```
+
+**Vertical Slicing Principle**: Code is organized by **business features** (stocks, portfolio, purchases, sales) rather than technical layers. Each feature contains its own domain, application, infrastructure, and ports layers. Shared components (Transaction, errors, config, persistence) live in the `shared` feature.
 
 ### II. SOLID Principles
 
@@ -79,7 +96,10 @@ src/
 **NON-NEGOTIABLE**: Code MUST be clean, readable, and modular.
 
 **Modularity Requirements**:
-- **Structure by business components**, not technical layers (each feature folder contains its own layers)
+- **Structure by business components (vertical slicing)**, not technical layers (each feature folder contains its own layers)
+- Each feature is a self-contained vertical slice with its own domain, application, infrastructure, and ports
+- Features communicate through well-defined ports/interfaces, not direct dependencies
+- Shared components (entities, services, infrastructure) are placed in the `shared` feature
 - Each module has a clear, single purpose
 - Modules are independently testable
 - Avoid circular dependencies (enforce with tools like `madge`)

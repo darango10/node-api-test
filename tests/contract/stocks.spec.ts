@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import express, { Express, Request, Response } from 'express';
-import { createStocksRouter } from '../../src/infrastructure/http/routes/stocks.routes';
-import { StockVendorPort } from '../../src/ports/services/stock-vendor.port';
-import { ListStocks } from '../../src/application/use-cases/list-stocks';
+import { createStocksRouter } from '../../src/features/stocks/infrastructure/routes/stocks.routes';
+import { StockVendorPort } from '../../src/features/stocks/ports/services/stock-vendor.port';
+import { ListStocks } from '../../src/features/stocks/application/use-cases/list-stocks';
 
 describe('GET /stocks - Contract Tests', () => {
   let app: Express;
@@ -19,7 +19,7 @@ describe('GET /stocks - Contract Tests', () => {
     // Create app with stocks router
     app = express();
     app.use(express.json());
-    
+
     const listStocksUseCase = new ListStocks(mockVendorPort);
     app.use('/stocks', createStocksRouter(listStocksUseCase));
 
@@ -45,10 +45,7 @@ describe('GET /stocks - Contract Tests', () => {
       });
 
       // Act
-      const response = await request(app)
-        .get('/stocks')
-        .query({ limit: 20 })
-        .expect(200);
+      const response = await request(app).get('/stocks').query({ limit: 20 }).expect(200);
 
       // Assert
       expect(response.body).toHaveProperty('stocks');
@@ -66,9 +63,7 @@ describe('GET /stocks - Contract Tests', () => {
     it('when nextToken is provided', async () => {
       // Arrange
       vi.mocked(mockVendorPort.listStocks).mockResolvedValue({
-        stocks: [
-          { symbol: 'MSFT', price: 300.0 },
-        ],
+        stocks: [{ symbol: 'MSFT', price: 300.0 }],
         nextToken: null,
       });
 
@@ -93,9 +88,7 @@ describe('GET /stocks - Contract Tests', () => {
       });
 
       // Act
-      const response = await request(app)
-        .get('/stocks')
-        .expect(200);
+      const response = await request(app).get('/stocks').expect(200);
 
       // Assert
       expect(response.body.stocks).toEqual([]);
@@ -111,9 +104,7 @@ describe('GET /stocks - Contract Tests', () => {
       );
 
       // Act
-      const response = await request(app)
-        .get('/stocks')
-        .expect(502);
+      const response = await request(app).get('/stocks').expect(502);
 
       // Assert
       expect(response.body).toHaveProperty('error');
@@ -122,14 +113,10 @@ describe('GET /stocks - Contract Tests', () => {
 
     it('when vendor times out', async () => {
       // Arrange
-      vi.mocked(mockVendorPort.listStocks).mockRejectedValue(
-        new Error('Request timeout')
-      );
+      vi.mocked(mockVendorPort.listStocks).mockRejectedValue(new Error('Request timeout'));
 
       // Act
-      const response = await request(app)
-        .get('/stocks')
-        .expect(502);
+      const response = await request(app).get('/stocks').expect(502);
 
       // Assert
       expect(response.body).toHaveProperty('error');
@@ -139,9 +126,7 @@ describe('GET /stocks - Contract Tests', () => {
   describe('should validate query parameters', () => {
     it('when limit is invalid', async () => {
       // Act
-      const response = await request(app)
-        .get('/stocks')
-        .query({ limit: -1 });
+      const response = await request(app).get('/stocks').query({ limit: -1 });
 
       // Assert - should either validate or use default
       expect(response.status).toBeGreaterThanOrEqual(200);
@@ -152,22 +137,18 @@ describe('GET /stocks - Contract Tests', () => {
     it('when response includes all required fields', async () => {
       // Arrange
       vi.mocked(mockVendorPort.listStocks).mockResolvedValue({
-        stocks: [
-          { symbol: 'AAPL', price: 150.0 },
-        ],
+        stocks: [{ symbol: 'AAPL', price: 150.0 }],
         nextToken: 'next',
       });
 
       // Act
-      const response = await request(app)
-        .get('/stocks')
-        .expect(200);
+      const response = await request(app).get('/stocks').expect(200);
 
       // Assert - Check OpenAPI schema compliance
       expect(response.body).toMatchObject({
         stocks: expect.any(Array),
       });
-      
+
       // Each stock must have symbol and price
       response.body.stocks.forEach((stock: { symbol: string; price: number }) => {
         expect(stock).toHaveProperty('symbol');
@@ -180,8 +161,7 @@ describe('GET /stocks - Contract Tests', () => {
       // nextToken is optional but must be string or null
       if (response.body.nextToken !== undefined) {
         expect(
-          typeof response.body.nextToken === 'string' || 
-          response.body.nextToken === null
+          typeof response.body.nextToken === 'string' || response.body.nextToken === null
         ).toBe(true);
       }
     });

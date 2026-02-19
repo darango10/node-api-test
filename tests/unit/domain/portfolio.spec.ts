@@ -1,4 +1,4 @@
-import { Portfolio, Position } from '../../../src/domain/entities/portfolio';
+import { Portfolio, Position } from '../../../src/features/portfolio/domain/entities/portfolio';
 
 describe('Portfolio Entity', () => {
   describe('Position', () => {
@@ -34,10 +34,7 @@ describe('Portfolio Entity', () => {
     });
 
     it('should create portfolio with positions when given valid data', () => {
-      const positions = [
-        new Position('AAPL', 10),
-        new Position('GOOGL', 5)
-      ];
+      const positions = [new Position('AAPL', 10), new Position('GOOGL', 5)];
       const portfolio = new Portfolio('user-123', positions);
       expect(portfolio.userId).toBe('user-123');
       expect(portfolio.positions).toHaveLength(2);
@@ -58,13 +55,13 @@ describe('Portfolio Entity', () => {
       const positions = [
         new Position('AAPL', 10),
         new Position('GOOGL', 0),
-        new Position('MSFT', 5)
+        new Position('MSFT', 5),
       ];
       const portfolio = new Portfolio('user-123', positions);
       const activePositions = portfolio.getActivePositions();
-      
+
       expect(activePositions).toHaveLength(2);
-      expect(activePositions.find(p => p.symbol === 'GOOGL')).toBeUndefined();
+      expect(activePositions.find((p) => p.symbol === 'GOOGL')).toBeUndefined();
     });
 
     it('should return empty array when no active positions', () => {
@@ -74,13 +71,10 @@ describe('Portfolio Entity', () => {
     });
 
     it('should find position by symbol', () => {
-      const positions = [
-        new Position('AAPL', 10),
-        new Position('GOOGL', 5)
-      ];
+      const positions = [new Position('AAPL', 10), new Position('GOOGL', 5)];
       const portfolio = new Portfolio('user-123', positions);
       const position = portfolio.findPosition('GOOGL');
-      
+
       expect(position).toBeDefined();
       expect(position?.symbol).toBe('GOOGL');
       expect(position?.quantity).toBe(5);

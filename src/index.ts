@@ -4,11 +4,14 @@
 // Load environment variables from .env file (must be first)
 import 'dotenv/config';
 
-import { loadConfig } from './infrastructure/config/index.js';
-import { logger } from './infrastructure/config/logger.js';
-import { connectDatabase, disconnectDatabase } from './infrastructure/persistence/mongo-connection.js';
-import { createApp } from './infrastructure/http/app.js';
-import { logAvailableEndpoints } from './infrastructure/http/utils/list-routes.js';
+import { loadConfig } from './features/shared/infrastructure/config/index.js';
+import { logger } from './features/shared/infrastructure/config/logger.js';
+import {
+  connectDatabase,
+  disconnectDatabase,
+} from './features/shared/infrastructure/persistence/mongo-connection.js';
+import { createApp } from './features/shared/infrastructure/http/app.js';
+import { logAvailableEndpoints } from './features/shared/infrastructure/http/utils/list-routes.js';
 import { Server } from 'http';
 
 // Global error handlers

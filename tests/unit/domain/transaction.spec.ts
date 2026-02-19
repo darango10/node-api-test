@@ -1,21 +1,18 @@
-import { Transaction, TransactionOutcome } from '../../../src/domain/entities/transaction';
-import { ValidationError } from '../../../src/domain/errors';
+import {
+  Transaction,
+  TransactionOutcome,
+} from '../../../src/features/shared/domain/entities/transaction';
+import { ValidationError } from '../../../src/features/shared/domain/errors';
 
 describe('Transaction Entity', () => {
   describe('constructor', () => {
     it('should create a valid transaction with success outcome', () => {
-      const transaction = new Transaction(
-        'user123',
-        'AAPL',
-        10,
-        150.50,
-        TransactionOutcome.SUCCESS
-      );
+      const transaction = new Transaction('user123', 'AAPL', 10, 150.5, TransactionOutcome.SUCCESS);
 
       expect(transaction.userId).toBe('user123');
       expect(transaction.symbol).toBe('AAPL');
       expect(transaction.quantity).toBe(10);
-      expect(transaction.price).toBe(150.50);
+      expect(transaction.price).toBe(150.5);
       expect(transaction.outcome).toBe(TransactionOutcome.SUCCESS);
       expect(transaction.reason).toBeUndefined();
       expect(transaction.createdAt).toBeInstanceOf(Date);
@@ -26,7 +23,7 @@ describe('Transaction Entity', () => {
         'user456',
         'GOOGL',
         5,
-        2800.00,
+        2800.0,
         TransactionOutcome.FAILURE,
         'Price out of tolerance'
       );
@@ -34,7 +31,7 @@ describe('Transaction Entity', () => {
       expect(transaction.userId).toBe('user456');
       expect(transaction.symbol).toBe('GOOGL');
       expect(transaction.quantity).toBe(5);
-      expect(transaction.price).toBe(2800.00);
+      expect(transaction.price).toBe(2800.0);
       expect(transaction.outcome).toBe(TransactionOutcome.FAILURE);
       expect(transaction.reason).toBe('Price out of tolerance');
       expect(transaction.createdAt).toBeInstanceOf(Date);
@@ -112,13 +109,7 @@ describe('Transaction Entity', () => {
 
   describe('toJSON', () => {
     it('should serialize to JSON format', () => {
-      const transaction = new Transaction(
-        'user123',
-        'AAPL',
-        10,
-        150.50,
-        TransactionOutcome.SUCCESS
-      );
+      const transaction = new Transaction('user123', 'AAPL', 10, 150.5, TransactionOutcome.SUCCESS);
 
       const json = transaction.toJSON();
 
@@ -126,7 +117,7 @@ describe('Transaction Entity', () => {
         userId: 'user123',
         symbol: 'AAPL',
         quantity: 10,
-        price: 150.50,
+        price: 150.5,
         outcome: 'success',
         createdAt: expect.any(Date),
       });
@@ -138,7 +129,7 @@ describe('Transaction Entity', () => {
         'user123',
         'AAPL',
         10,
-        150.50,
+        150.5,
         TransactionOutcome.FAILURE,
         'Vendor unavailable'
       );
@@ -149,7 +140,7 @@ describe('Transaction Entity', () => {
         userId: 'user123',
         symbol: 'AAPL',
         quantity: 10,
-        price: 150.50,
+        price: 150.5,
         outcome: 'failure',
         reason: 'Vendor unavailable',
         createdAt: expect.any(Date),
@@ -159,13 +150,7 @@ describe('Transaction Entity', () => {
 
   describe('immutability', () => {
     it('should not allow modification of properties after creation', () => {
-      const transaction = new Transaction(
-        'user123',
-        'AAPL',
-        10,
-        150.50,
-        TransactionOutcome.SUCCESS
-      );
+      const transaction = new Transaction('user123', 'AAPL', 10, 150.5, TransactionOutcome.SUCCESS);
 
       // TypeScript prevents this at compile time, but testing runtime behavior
       expect(() => {

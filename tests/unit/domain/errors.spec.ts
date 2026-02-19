@@ -4,7 +4,7 @@ import {
   ValidationError,
   NotFoundError,
   InsufficientSharesError,
-} from '../../../src/domain/errors';
+} from '../../../src/features/shared/domain/errors';
 
 describe('Domain Errors', () => {
   describe('InsufficientSharesError', () => {

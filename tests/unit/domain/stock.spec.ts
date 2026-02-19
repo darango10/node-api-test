@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Stock, validateStock } from '../../../src/domain/entities/stock';
+import { Stock, validateStock } from '../../../src/features/stocks/domain/entities/stock';
 
 describe('Stock Entity', () => {
   describe('should be valid', () => {

@@ -1,11 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ExecuteSell } from '../../../src/application/use-cases/execute-sell';
-import { StockVendorPort } from '../../../src/ports/services/stock-vendor.port';
-import { PortfolioRepositoryPort } from '../../../src/ports/repositories/portfolio-repository.port';
-import { TransactionRepositoryPort } from '../../../src/ports/repositories/transaction-repository.port';
-import { ValidationError, InsufficientSharesError } from '../../../src/domain/errors';
-import { TransactionOutcome } from '../../../src/domain/entities/transaction';
-import { Portfolio, Position } from '../../../src/domain/entities/portfolio';
+import { ExecuteSell } from '../../../src/features/sales/application/use-cases/execute-sell';
+import { StockVendorPort } from '../../../src/features/stocks/ports/services/stock-vendor.port';
+import { PortfolioRepositoryPort } from '../../../src/features/portfolio/ports/repositories/portfolio-repository.port';
+import { TransactionRepositoryPort } from '../../../src/features/shared/ports/repositories/transaction-repository.port';
+import {
+  ValidationError,
+  InsufficientSharesError,
+} from '../../../src/features/shared/domain/errors';
+import { TransactionOutcome } from '../../../src/features/shared/domain/entities/transaction';
+import { Portfolio, Position } from '../../../src/features/portfolio/domain/entities/portfolio';
 
 describe('ExecuteSell Use Case', () => {
   let executeSell: ExecuteSell;
@@ -60,11 +63,7 @@ describe('ExecuteSell Use Case', () => {
       expect(result.transaction?.symbol).toBe(symbol);
       expect(result.transaction?.quantity).toBe(quantity);
       expect(result.transaction?.price).toBe(currentPrice);
-      expect(mockPortfolioRepository.reducePosition).toHaveBeenCalledWith(
-        userId,
-        symbol,
-        quantity
-      );
+      expect(mockPortfolioRepository.reducePosition).toHaveBeenCalledWith(userId, symbol, quantity);
       expect(mockStockVendorPort.getCurrentPrice).toHaveBeenCalledWith(symbol);
     });
   });
@@ -119,9 +118,9 @@ describe('ExecuteSell Use Case', () => {
     });
 
     it('should throw ValidationError when symbol is empty', async () => {
-      await expect(
-        executeSell.execute({ userId: 'u1', symbol: '', quantity: 10 })
-      ).rejects.toThrow(ValidationError);
+      await expect(executeSell.execute({ userId: 'u1', symbol: '', quantity: 10 })).rejects.toThrow(
+        ValidationError
+      );
     });
 
     it('should throw ValidationError when quantity is not a positive integer', async () => {

@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { TransactionRepositoryImpl } from '../../src/infrastructure/persistence/transaction.repository';
-import { Transaction, TransactionOutcome } from '../../src/domain/entities/transaction';
-import { TransactionModel } from '../../src/infrastructure/persistence/models/transaction.model';
+import { TransactionRepositoryImpl } from '../../src/features/shared/infrastructure/repositories/transaction.repository';
+import {
+  Transaction,
+  TransactionOutcome,
+} from '../../src/features/shared/domain/entities/transaction';
+import { TransactionModel } from '../../src/features/shared/infrastructure/repositories/transaction.model';
 
 describe('TransactionRepository Integration', () => {
   let mongoServer: MongoMemoryServer;
@@ -12,11 +15,11 @@ describe('TransactionRepository Integration', () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri);
-  });
+  }, 30000);
 
   afterAll(async () => {
     await mongoose.disconnect();
-    await mongoServer.stop();
+    if (mongoServer) await mongoServer.stop();
   });
 
   beforeEach(async () => {
@@ -26,13 +29,7 @@ describe('TransactionRepository Integration', () => {
 
   describe('save', () => {
     it('should save a successful transaction to database', async () => {
-      const transaction = new Transaction(
-        'user123',
-        'AAPL',
-        10,
-        150.50,
-        TransactionOutcome.SUCCESS
-      );
+      const transaction = new Transaction('user123', 'AAPL', 10, 150.5, TransactionOutcome.SUCCESS);
 
       await repository.save(transaction);
 
@@ -41,7 +38,7 @@ describe('TransactionRepository Integration', () => {
       expect(saved?.userId).toBe('user123');
       expect(saved?.symbol).toBe('AAPL');
       expect(saved?.quantity).toBe(10);
-      expect(saved?.price).toBe(150.50);
+      expect(saved?.price).toBe(150.5);
       expect(saved?.outcome).toBe('success');
       expect(saved?.reason).toBeUndefined();
       expect(saved?.createdAt).toBeInstanceOf(Date);
@@ -52,7 +49,7 @@ describe('TransactionRepository Integration', () => {
         'user456',
         'GOOGL',
         5,
-        2800.00,
+        2800.0,
         TransactionOutcome.FAILURE,
         'Price out of tolerance'
       );
@@ -70,7 +67,7 @@ describe('TransactionRepository Integration', () => {
         'user123',
         'AAPL',
         10,
-        150.00,
+        150.0,
         TransactionOutcome.SUCCESS
       );
 
@@ -78,7 +75,7 @@ describe('TransactionRepository Integration', () => {
         'user123',
         'GOOGL',
         5,
-        2800.00,
+        2800.0,
         TransactionOutcome.SUCCESS
       );
 
@@ -90,17 +87,12 @@ describe('TransactionRepository Integration', () => {
     });
 
     it('should handle concurrent saves', async () => {
-      const transactions = Array.from({ length: 10 }, (_, i) =>
-        new Transaction(
-          'user123',
-          'AAPL',
-          i + 1,
-          150.00 + i,
-          TransactionOutcome.SUCCESS
-        )
+      const transactions = Array.from(
+        { length: 10 },
+        (_, i) => new Transaction('user123', 'AAPL', i + 1, 150.0 + i, TransactionOutcome.SUCCESS)
       );
 
-      await Promise.all(transactions.map(t => repository.save(t)));
+      await Promise.all(transactions.map((t) => repository.save(t)));
 
       const count = await TransactionModel.countDocuments({ userId: 'user123' });
       expect(count).toBe(10);
@@ -158,7 +150,7 @@ describe('TransactionRepository Integration', () => {
 
       // Should return transactions from 2 days ago, 1 day ago, and now (3 total)
       expect(transactions.length).toBeGreaterThanOrEqual(2);
-      expect(transactions.every(t => t.createdAt >= twoDaysAgo)).toBe(true);
+      expect(transactions.every((t) => t.createdAt >= twoDaysAgo)).toBe(true);
     });
 
     it('should return all transactions when since date is very old', async () => {
@@ -180,8 +172,9 @@ describe('TransactionRepository Integration', () => {
       const transactions = await repository.findSince(veryOld);
 
       for (let i = 1; i < transactions.length; i++) {
-        expect(transactions[i].createdAt.getTime())
-          .toBeGreaterThanOrEqual(transactions[i - 1].createdAt.getTime());
+        expect(transactions[i].createdAt.getTime()).toBeGreaterThanOrEqual(
+          transactions[i - 1].createdAt.getTime()
+        );
       }
     });
 
@@ -189,8 +182,8 @@ describe('TransactionRepository Integration', () => {
       const veryOld = new Date('2020-01-01');
       const transactions = await repository.findSince(veryOld);
 
-      const hasSuccess = transactions.some(t => t.outcome === TransactionOutcome.SUCCESS);
-      const hasFailure = transactions.some(t => t.outcome === TransactionOutcome.FAILURE);
+      const hasSuccess = transactions.some((t) => t.outcome === TransactionOutcome.SUCCESS);
+      const hasFailure = transactions.some((t) => t.outcome === TransactionOutcome.FAILURE);
 
       expect(hasSuccess).toBe(true);
       expect(hasFailure).toBe(true);
@@ -200,7 +193,7 @@ describe('TransactionRepository Integration', () => {
       const veryOld = new Date('2020-01-01');
       const transactions = await repository.findSince(veryOld);
 
-      transactions.forEach(t => {
+      transactions.forEach((t) => {
         expect(t).toBeInstanceOf(Transaction);
         expect(t.userId).toBeDefined();
         expect(t.symbol).toBeDefined();
@@ -223,7 +216,7 @@ describe('TransactionRepository Integration', () => {
         100,
         TransactionOutcome.SUCCESS
       );
-      
+
       // Manually set createdAt to test boundary
       await TransactionModel.create({
         ...boundaryTransaction.toJSON(),
@@ -231,7 +224,7 @@ describe('TransactionRepository Integration', () => {
       });
 
       const transactions = await repository.findSince(oneDayAgo);
-      const foundBoundary = transactions.find(t => t.userId === 'boundary-user');
+      const foundBoundary = transactions.find((t) => t.userId === 'boundary-user');
 
       expect(foundBoundary).toBeDefined();
     });
@@ -248,50 +241,45 @@ describe('TransactionRepository Integration', () => {
         outcome: 'invalid-outcome', // Invalid enum value
       };
 
-      await expect(
-        TransactionModel.create(invalidDoc)
-      ).rejects.toThrow();
+      await expect(TransactionModel.create(invalidDoc)).rejects.toThrow();
     });
   });
 
   describe('performance', () => {
     it('should handle large batch of transactions efficiently', async () => {
       const batchSize = 1000;
-      const transactions = Array.from({ length: batchSize }, (_, i) =>
-        new Transaction(
-          `user${i}`,
-          'AAPL',
-          10,
-          150.00,
-          i % 2 === 0 ? TransactionOutcome.SUCCESS : TransactionOutcome.FAILURE,
-          i % 2 === 0 ? undefined : 'Test failure'
-        )
+      const transactions = Array.from(
+        { length: batchSize },
+        (_, i) =>
+          new Transaction(
+            `user${i}`,
+            'AAPL',
+            10,
+            150.0,
+            i % 2 === 0 ? TransactionOutcome.SUCCESS : TransactionOutcome.FAILURE,
+            i % 2 === 0 ? undefined : 'Test failure'
+          )
       );
 
       const startTime = Date.now();
-      await Promise.all(transactions.map(t => repository.save(t)));
+      await Promise.all(transactions.map((t) => repository.save(t)));
       const endTime = Date.now();
 
       const count = await TransactionModel.countDocuments({});
       expect(count).toBe(batchSize);
-      
+
       // Should complete within reasonable time (10 seconds for 1000 records)
       expect(endTime - startTime).toBeLessThan(10000);
     });
 
     it('should query efficiently with index on createdAt', async () => {
       // Create 100 transactions spread over time
-      const transactions = Array.from({ length: 100 }, (_, i) =>
-        new Transaction(
-          `user${i}`,
-          'AAPL',
-          10,
-          150.00,
-          TransactionOutcome.SUCCESS
-        )
+      const transactions = Array.from(
+        { length: 100 },
+        (_, i) => new Transaction(`user${i}`, 'AAPL', 10, 150.0, TransactionOutcome.SUCCESS)
       );
 
-      await Promise.all(transactions.map(t => repository.save(t)));
+      await Promise.all(transactions.map((t) => repository.save(t)));
 
       // Query should be fast with index
       const startTime = Date.now();

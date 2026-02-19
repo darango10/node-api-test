@@ -1,13 +1,13 @@
 import request from 'supertest';
 import express, { Express } from 'express';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { salesRouter } from '../../src/infrastructure/http/routes/sales.routes';
-import { ExecuteSell } from '../../src/application/use-cases/execute-sell';
-import { StockVendorPort } from '../../src/ports/services/stock-vendor.port';
-import { PortfolioRepositoryPort } from '../../src/ports/repositories/portfolio-repository.port';
-import { TransactionRepositoryPort } from '../../src/ports/repositories/transaction-repository.port';
-import { errorHandler } from '../../src/infrastructure/http/middlewares/error-handler';
-import { Portfolio, Position } from '../../src/domain/entities/portfolio';
+import { salesRouter } from '../../src/features/sales/infrastructure/routes/sales.routes';
+import { ExecuteSell } from '../../src/features/sales/application/use-cases/execute-sell';
+import { StockVendorPort } from '../../src/features/stocks/ports/services/stock-vendor.port';
+import { PortfolioRepositoryPort } from '../../src/features/portfolio/ports/repositories/portfolio-repository.port';
+import { TransactionRepositoryPort } from '../../src/features/shared/ports/repositories/transaction-repository.port';
+import { errorHandler } from '../../src/features/shared/infrastructure/http/middlewares/error-handler';
+import { Portfolio, Position } from '../../src/features/portfolio/domain/entities/portfolio';
 
 describe('POST /users/:userId/sales - Contract', () => {
   let app: Express;

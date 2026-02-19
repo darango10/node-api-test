@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ListStocks } from '../../../src/application/use-cases/list-stocks';
-import { StockVendorPort } from '../../../src/ports/services/stock-vendor.port';
-import { Stock } from '../../../src/domain/entities/stock';
+import { ListStocks } from '../../../src/features/stocks/application/use-cases/list-stocks';
+import { StockVendorPort } from '../../../src/features/stocks/ports/services/stock-vendor.port';
+import { Stock } from '../../../src/features/stocks/domain/entities/stock';
 
 describe('ListStocks Use Case', () => {
   let mockVendorPort: StockVendorPort;
@@ -44,9 +44,7 @@ describe('ListStocks Use Case', () => {
   describe('should handle pagination token', () => {
     it('when nextToken is provided', async () => {
       // Arrange
-      const mockStocks: Stock[] = [
-        { symbol: 'MSFT', price: 300.0 },
-      ];
+      const mockStocks: Stock[] = [{ symbol: 'MSFT', price: 300.0 }];
       const inputToken = 'page2token';
       vi.mocked(mockVendorPort.listStocks).mockResolvedValue({
         stocks: mockStocks,
@@ -54,9 +52,9 @@ describe('ListStocks Use Case', () => {
       });
 
       // Act
-      const result = await listStocks.execute({ 
+      const result = await listStocks.execute({
         nextToken: inputToken,
-        limit: 10 
+        limit: 10,
       });
 
       // Assert
@@ -93,8 +91,7 @@ describe('ListStocks Use Case', () => {
       vi.mocked(mockVendorPort.listStocks).mockRejectedValue(vendorError);
 
       // Act & Assert
-      await expect(listStocks.execute({ limit: 20 }))
-        .rejects.toThrow('Vendor unavailable');
+      await expect(listStocks.execute({ limit: 20 })).rejects.toThrow('Vendor unavailable');
     });
   });
 });

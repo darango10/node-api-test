@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { GetPortfolio } from '../../../src/application/use-cases/get-portfolio';
-import { PortfolioRepositoryPort } from '../../../src/ports/repositories/portfolio-repository.port';
-import { Portfolio, Position } from '../../../src/domain/entities/portfolio';
+import { GetPortfolio } from '../../../src/features/portfolio/application/use-cases/get-portfolio';
+import { PortfolioRepositoryPort } from '../../../src/features/portfolio/ports/repositories/portfolio-repository.port';
+import { Portfolio, Position } from '../../../src/features/portfolio/domain/entities/portfolio';
 
 describe('GetPortfolio Use Case', () => {
   let getPortfolio: GetPortfolio;
@@ -10,16 +10,13 @@ describe('GetPortfolio Use Case', () => {
   beforeEach(() => {
     mockPortfolioRepository = {
       getByUserId: vi.fn(),
-      upsertPosition: vi.fn()
+      upsertPosition: vi.fn(),
     };
     getPortfolio = new GetPortfolio(mockPortfolioRepository);
   });
 
   it('should return portfolio when user has positions', async () => {
-    const positions = [
-      new Position('AAPL', 10),
-      new Position('GOOGL', 5)
-    ];
+    const positions = [new Position('AAPL', 10), new Position('GOOGL', 5)];
     const mockPortfolio = new Portfolio('user-123', positions);
     vi.mocked(mockPortfolioRepository.getByUserId).mockResolvedValue(mockPortfolio);
 
@@ -51,7 +48,9 @@ describe('GetPortfolio Use Case', () => {
   });
 
   it('should propagate repository errors', async () => {
-    vi.mocked(mockPortfolioRepository.getByUserId).mockRejectedValue(new Error('Database connection failed'));
+    vi.mocked(mockPortfolioRepository.getByUserId).mockRejectedValue(
+      new Error('Database connection failed')
+    );
 
     await expect(getPortfolio.execute('user-123')).rejects.toThrow('Database connection failed');
   });

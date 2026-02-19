@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
-import { StockVendorAdapter } from '../../src/infrastructure/external/stock-vendor.adapter';
+import { StockVendorAdapter } from '../../src/features/stocks/infrastructure/adapters/stock-vendor.adapter';
 
 describe('StockVendorAdapter Integration', () => {
   let adapter: StockVendorAdapter;
@@ -43,9 +43,7 @@ describe('StockVendorAdapter Integration', () => {
           .reply(200, {
             status: 200,
             data: {
-              items: [
-                { symbol: 'MSFT', price: 300.0, name: 'Microsoft Corp.' },
-              ],
+              items: [{ symbol: 'MSFT', price: 300.0, name: 'Microsoft Corp.' }],
               nextToken: null,
             },
           });
@@ -72,9 +70,7 @@ describe('StockVendorAdapter Integration', () => {
           .reply(200, {
             status: 200,
             data: {
-              items: [
-                { symbol: 'MSFT', price: 300.0, name: 'Microsoft Corp.' },
-              ],
+              items: [{ symbol: 'MSFT', price: 300.0, name: 'Microsoft Corp.' }],
               nextToken: null,
             },
           });
@@ -98,8 +94,7 @@ describe('StockVendorAdapter Integration', () => {
           .reply(503, { error: 'Service temporarily unavailable' });
 
         // Act & Assert
-        await expect(adapter.listStocks({ limit: 20 }))
-          .rejects.toThrow();
+        await expect(adapter.listStocks({ limit: 20 })).rejects.toThrow();
       });
 
       it('when vendor times out', async () => {
@@ -111,12 +106,11 @@ describe('StockVendorAdapter Integration', () => {
           .delayConnection(6000)
           .reply(200, {
             status: 200,
-            data: { items: [], nextToken: null }
+            data: { items: [], nextToken: null },
           });
 
         // Act & Assert
-        await expect(adapter.listStocks({ limit: 20 }))
-          .rejects.toThrow();
+        await expect(adapter.listStocks({ limit: 20 })).rejects.toThrow();
       }, 10000); // 10 second timeout for this test
 
       it('when vendor returns invalid response format', async () => {
@@ -128,8 +122,9 @@ describe('StockVendorAdapter Integration', () => {
           .reply(200, { invalid: 'response' });
 
         // Act & Assert
-        await expect(adapter.listStocks({ limit: 20 }))
-          .rejects.toThrow('Invalid response format from vendor');
+        await expect(adapter.listStocks({ limit: 20 })).rejects.toThrow(
+          'Invalid response format from vendor'
+        );
       });
     });
 
@@ -170,18 +165,18 @@ describe('StockVendorAdapter Integration', () => {
             status: 200,
             data: {
               items: [
-                { symbol: 'AAPL', price: 155.50, name: 'Apple Inc.' },
-                { symbol: 'GOOGL', price: 2800.00, name: 'Alphabet Inc.' },
+                { symbol: 'AAPL', price: 155.5, name: 'Apple Inc.' },
+                { symbol: 'GOOGL', price: 2800.0, name: 'Alphabet Inc.' },
               ],
-              nextToken: null
-            }
+              nextToken: null,
+            },
           });
 
         // Act
         const price = await adapter.getCurrentPrice('AAPL');
 
         // Assert
-        expect(price).toBe(155.50);
+        expect(price).toBe(155.5);
       });
     });
 
@@ -195,16 +190,15 @@ describe('StockVendorAdapter Integration', () => {
           .reply(200, {
             status: 200,
             data: {
-              items: [
-                { symbol: 'AAPL', price: 155.50, name: 'Apple Inc.' },
-              ],
-              nextToken: null
-            }
+              items: [{ symbol: 'AAPL', price: 155.5, name: 'Apple Inc.' }],
+              nextToken: null,
+            },
           });
 
         // Act & Assert
-        await expect(adapter.getCurrentPrice('INVALID'))
-          .rejects.toThrow('Stock symbol INVALID not found');
+        await expect(adapter.getCurrentPrice('INVALID')).rejects.toThrow(
+          'Stock symbol INVALID not found'
+        );
       });
 
       it('when vendor returns 5xx error', async () => {
@@ -213,14 +207,13 @@ describe('StockVendorAdapter Integration', () => {
           .get('/stocks')
           .query({ limit: 1000 })
           .matchHeader('x-api-key', testApiKey)
-          .reply(500, { 
+          .reply(500, {
             status: 500,
-            error: 'Internal server error' 
+            error: 'Internal server error',
           });
 
         // Act & Assert
-        await expect(adapter.getCurrentPrice('AAPL'))
-          .rejects.toThrow('Vendor service unavailable');
+        await expect(adapter.getCurrentPrice('AAPL')).rejects.toThrow('Vendor service unavailable');
       });
     });
   });
