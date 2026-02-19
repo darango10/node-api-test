@@ -11,6 +11,7 @@ import {
   disconnectDatabase,
 } from './features/shared/infrastructure/persistence/mongo-connection.js';
 import { createApp } from './features/shared/infrastructure/http/app.js';
+import { createContainer } from './features/shared/infrastructure/config/container.js';
 import { logAvailableEndpoints } from './features/shared/infrastructure/http/utils/list-routes.js';
 import { Server } from 'http';
 
@@ -33,8 +34,9 @@ const startServer = async (): Promise<Server> => {
     // Connect to MongoDB
     await connectDatabase(config.MONGODB_URI);
 
-    // Create Express app
-    const app = createApp();
+    // Create container and Express app (container passed so index can attach WebSocket)
+    const container = createContainer();
+    const app = createApp(container);
 
     // Start HTTP server
     const server = app.listen(config.PORT, () => {
@@ -46,9 +48,14 @@ const startServer = async (): Promise<Server> => {
       logAvailableEndpoints(app);
     });
 
+    // Attach WebSocket server to HTTP server (path /ws?userId=...)
+    container.websocketAdapter.attachToServer(server);
+
     // Graceful shutdown
     const shutdown = async (signal: string) => {
       logger.info(`${signal} received, starting graceful shutdown`);
+
+      container.websocketAdapter.close();
 
       server.close(async () => {
         logger.info('HTTP server closed');

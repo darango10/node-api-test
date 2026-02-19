@@ -49,17 +49,17 @@
 
 ### Tests for User Story 1 (TDD – write first, then implement)
 
-- [ ] T003 [P] [US1] Unit test: ExecutePurchase calls EventPublisherPort.publishPurchaseCompleted with correct payload when purchase succeeds in tests/unit/purchases/execute-purchase-event.spec.ts
-- [ ] T004 [P] [US1] Unit test: ExecutePurchase does not call EventPublisherPort when purchase fails (e.g. price out of tolerance or vendor reject) in tests/unit/purchases/execute-purchase-event.spec.ts
-- [ ] T005 [US1] Integration test: WebSocket client connected with userId receives exactly one purchase_completed message when that user completes a successful purchase in tests/integration/websocket-purchase-event.spec.ts
-- [ ] T006 [P] [US1] Contract test: purchase_completed message conforms to specs/004-websocket-stock-events/contracts/purchase-completed-event.schema.json in tests/contract/websocket-purchase-event.spec.ts
+- [x] T003 [P] [US1] Unit test: ExecutePurchase calls EventPublisherPort.publishPurchaseCompleted with correct payload when purchase succeeds in tests/unit/purchases/execute-purchase-event.spec.ts
+- [x] T004 [P] [US1] Unit test: ExecutePurchase does not call EventPublisherPort when purchase fails (e.g. price out of tolerance or vendor reject) in tests/unit/purchases/execute-purchase-event.spec.ts
+- [x] T005 [US1] Integration test: WebSocket client connected with userId receives exactly one purchase_completed message when that user completes a successful purchase in tests/integration/websocket-purchase-event.spec.ts
+- [x] T006 [P] [US1] Contract test: purchase_completed message conforms to specs/004-websocket-stock-events/contracts/purchase-completed-event.schema.json in tests/contract/websocket-purchase-event.spec.ts
 
 ### Implementation for User Story 1 (after tests are written and failing)
 
-- [ ] T007 [US1] Implement WebSocket server adapter: connection store Map<userId, Set<WebSocket>>; on upgrade parse userId from query, register socket; on close unregister; implement EventPublisherPort.publishPurchaseCompleted to send JSON payload to all sockets for payload.userId in src/features/shared/infrastructure/websocket/
-- [ ] T008 [US1] Attach WebSocket upgrade handler to HTTP server and instantiate WS adapter in src/index.ts (after server = app.listen(...))
-- [ ] T009 [US1] Inject optional EventPublisherPort into ExecutePurchase and call publishPurchaseCompleted(payload) after successful purchase and persist in src/features/purchases/application/use-cases/execute-purchase.ts
-- [ ] T010 [US1] Register EventPublisherPort (WebSocket adapter) in container and pass to ExecutePurchase in src/features/shared/infrastructure/config/container.ts
+- [x] T007 [US1] Implement WebSocket server adapter: connection store Map<userId, Set<WebSocket>>; on upgrade parse userId from query, register socket; on close unregister; implement EventPublisherPort.publishPurchaseCompleted to send JSON payload to all sockets for payload.userId in src/features/shared/infrastructure/websocket/
+- [x] T008 [US1] Attach WebSocket upgrade handler to HTTP server and instantiate WS adapter in src/index.ts (after server = app.listen(...))
+- [x] T009 [US1] Inject optional EventPublisherPort into ExecutePurchase and call publishPurchaseCompleted(payload) after successful purchase and persist in src/features/purchases/application/use-cases/execute-purchase.ts
+- [x] T010 [US1] Register EventPublisherPort (WebSocket adapter) in container and pass to ExecutePurchase in src/features/shared/infrastructure/config/container.ts
 
 **Checkpoint**: User Story 1 complete — client receives event on successful purchase; independently testable.
 

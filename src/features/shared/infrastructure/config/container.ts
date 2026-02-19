@@ -9,6 +9,7 @@ import { TransactionRepositoryImpl } from '../repositories/transaction.repositor
 import { TransactionRepositoryPort } from '../../ports/repositories/transaction-repository.port';
 import { ExecutePurchase } from '../../../purchases/application/use-cases/execute-purchase';
 import { ExecuteSell } from '../../../sales/application/use-cases/execute-sell';
+import { WebSocketServerAdapter } from '../websocket/websocket-server.adapter';
 
 /**
  * Dependency injection container / factory for ports.
@@ -24,6 +25,7 @@ export interface Container {
   getPortfolioUseCase: GetPortfolio;
   executePurchaseUseCase: ExecutePurchase;
   executeSellUseCase: ExecuteSell;
+  websocketAdapter: WebSocketServerAdapter;
 }
 
 /**
@@ -42,6 +44,7 @@ export function createContainer(): Container {
 
   const portfolioRepository = new PortfolioRepositoryImpl();
   const transactionRepository = new TransactionRepositoryImpl();
+  const websocketAdapter = new WebSocketServerAdapter();
 
   // Application use cases
   const listStocksUseCase = new ListStocks(stockVendorPort);
@@ -49,7 +52,8 @@ export function createContainer(): Container {
   const executePurchaseUseCase = new ExecutePurchase(
     stockVendorPort,
     portfolioRepository,
-    transactionRepository
+    transactionRepository,
+    websocketAdapter
   );
 
   const executeSellUseCase = new ExecuteSell(
@@ -66,5 +70,6 @@ export function createContainer(): Container {
     getPortfolioUseCase,
     executePurchaseUseCase,
     executeSellUseCase,
+    websocketAdapter,
   };
 }
