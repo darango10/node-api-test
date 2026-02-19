@@ -25,7 +25,7 @@
 
 **Purpose**: Add only what this feature needs; existing API structure remains.
 
-- [ ] T001 [P] Add `ws` dependency to package.json (npm install ws; add types if needed)
+- [x] T001 [P] Add `ws` dependency to package.json (npm install ws; add types if needed)
 
 ---
 
@@ -35,7 +35,7 @@
 
 **⚠️ CRITICAL**: No user story implementation can begin until this phase is complete.
 
-- [ ] T002 [P] Define EventPublisherPort (publishPurchaseCompleted(payload)) and PurchaseCompletedPayload type in src/features/shared/ports/event-publisher.port.ts per data-model.md
+- [x] T002 [P] Define EventPublisherPort (publishPurchaseCompleted(payload)) and PurchaseCompletedPayload type in src/features/shared/ports/event-publisher.port.ts per data-model.md
 
 **Checkpoint**: Port and payload type defined; US1 implementation can start.
 
