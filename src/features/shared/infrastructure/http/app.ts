@@ -14,9 +14,9 @@ import { createPortfolioRoutes } from '../../../portfolio/infrastructure/routes/
 import { purchasesRouter } from '../../../purchases/infrastructure/routes/purchases.routes';
 import { salesRouter } from '../../../sales/infrastructure/routes/sales.routes';
 import { PortfolioController } from '../../../portfolio/infrastructure/controllers/portfolio.controller';
-import { createContainer } from '../config/container';
+import { createContainer, type Container } from '../config/container';
 
-export const createApp = (): Express => {
+export const createApp = (container?: Container): Express => {
   const app = express();
 
   // Security middleware with Swagger UI exception
@@ -73,17 +73,17 @@ export const createApp = (): Express => {
   app.use(healthRoutes);
   app.use(metricsRoutes);
 
-  // Create dependency injection container
-  const container = createContainer();
+  // Create dependency injection container (or use provided one, e.g. from index for WS attachment)
+  const appContainer = container ?? createContainer();
 
   // Controllers
-  const portfolioController = new PortfolioController(container.getPortfolioUseCase);
+  const portfolioController = new PortfolioController(appContainer.getPortfolioUseCase);
 
   // API routes
-  app.use('/stocks', createStocksRouter(container.listStocksUseCase));
+  app.use('/stocks', createStocksRouter(appContainer.listStocksUseCase));
   app.use(createPortfolioRoutes(portfolioController));
-  app.use('/users/:userId/purchases', purchasesRouter(container.executePurchaseUseCase));
-  app.use('/users/:userId/sales', salesRouter(container.executeSellUseCase));
+  app.use('/users/:userId/purchases', purchasesRouter(appContainer.executePurchaseUseCase));
+  app.use('/users/:userId/sales', salesRouter(appContainer.executeSellUseCase));
 
   // Error handler must be last
   app.use(errorHandler);

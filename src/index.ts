@@ -11,6 +11,7 @@ import {
   disconnectDatabase,
 } from './features/shared/infrastructure/persistence/mongo-connection.js';
 import { createApp } from './features/shared/infrastructure/http/app.js';
+import { createContainer } from './features/shared/infrastructure/config/container.js';
 import { logAvailableEndpoints } from './features/shared/infrastructure/http/utils/list-routes.js';
 import { Server } from 'http';
 
@@ -33,22 +34,33 @@ const startServer = async (): Promise<Server> => {
     // Connect to MongoDB
     await connectDatabase(config.MONGODB_URI);
 
-    // Create Express app
-    const app = createApp();
+    // Create container and Express app (container passed so index can attach WebSocket)
+    const container = createContainer();
+    const app = createApp(container);
 
     // Start HTTP server
     const server = app.listen(config.PORT, () => {
       logger.info(`🚀 Server listening on port ${config.PORT}`);
       logger.info(`🌍 Environment: ${config.NODE_ENV}`);
       logger.info(`📚 API Documentation: http://localhost:${config.PORT}/api-docs`);
+      logger.info(`🔌 WebSocket subscribe (events): ws://localhost:${config.PORT}/ws/events?userId=USER_ID`);
 
       // List all available endpoints
       logAvailableEndpoints(app);
     });
 
-    // Graceful shutdown
+    // Attach WebSocket server to HTTP server (path /ws/events?userId=...)
+    container.websocketAdapter.attachToServer(server);
+
+    // Graceful shutdown: close WebSocket server and all client connections first, then HTTP server
     const shutdown = async (signal: string) => {
       logger.info(`${signal} received, starting graceful shutdown`);
+
+      try {
+        await container.websocketAdapter.close();
+      } catch (err) {
+        logger.warn({ err }, 'Error closing WebSocket server (continuing shutdown)');
+      }
 
       server.close(async () => {
         logger.info('HTTP server closed');

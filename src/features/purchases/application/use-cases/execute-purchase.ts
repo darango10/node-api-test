@@ -1,6 +1,10 @@
 import { StockVendorPort } from '../../../stocks/ports/services/stock-vendor.port';
 import { PortfolioRepositoryPort } from '../../../portfolio/ports/repositories/portfolio-repository.port';
 import { TransactionRepositoryPort } from '../../../shared/ports/repositories/transaction-repository.port';
+import type {
+  EventPublisherPort,
+  PurchaseCompletedPayload,
+} from '../../../shared/ports/event-publisher.port';
 import { Transaction, TransactionOutcome } from '../../../shared/domain/entities/transaction';
 import { ValidationError } from '../../../shared/domain/errors';
 import { isWithinTolerance } from '../../../shared/domain/services/price-tolerance';
@@ -46,7 +50,8 @@ export class ExecutePurchase {
   constructor(
     private readonly stockVendorPort: StockVendorPort,
     private readonly portfolioRepository: PortfolioRepositoryPort,
-    private readonly transactionRepository: TransactionRepositoryPort
+    private readonly transactionRepository: TransactionRepositoryPort,
+    private readonly eventPublisher?: EventPublisherPort
   ) {}
 
   async execute(request: ExecutePurchaseRequest): Promise<ExecutePurchaseResult> {
@@ -162,6 +167,8 @@ export class ExecutePurchase {
       // Record the successful transaction (don't throw if this fails)
       await this.saveTransactionSafely(transaction);
 
+      this.emitPurchaseCompletedIfPresent(transaction, buyResult.order?.total);
+
       return {
         success: true,
         transaction,
@@ -217,6 +224,29 @@ export class ExecutePurchase {
 
     if (price <= 0) {
       throw new ValidationError('Price must be positive');
+    }
+  }
+
+  /**
+   * Emit purchase_completed event if EventPublisherPort is provided (best-effort, fire-and-forget).
+   */
+  private emitPurchaseCompletedIfPresent(transaction: Transaction, total?: number): void {
+    if (!this.eventPublisher) return;
+    const payload: PurchaseCompletedPayload = {
+      type: 'purchase_completed',
+      userId: transaction.userId,
+      symbol: transaction.symbol,
+      quantity: transaction.quantity,
+      success: true,
+      price: transaction.price,
+      total: total ?? transaction.quantity * transaction.price,
+      timestamp: new Date().toISOString(),
+    };
+    try {
+      const result = this.eventPublisher.publishPurchaseCompleted(payload);
+      if (result instanceof Promise) result.catch(() => {});
+    } catch {
+      // Best-effort: do not fail the purchase
     }
   }
 

@@ -20,5 +20,9 @@ describe('createContainer', () => {
     expect(typeof container).toBe('object');
     expect(container).toHaveProperty('stockVendorPort');
     expect(container).toHaveProperty('listStocksUseCase');
+    expect(container).toHaveProperty('websocketAdapter');
+    expect(container.websocketAdapter).toBeDefined();
+    expect(typeof container.websocketAdapter.attachToServer).toBe('function');
+    expect(typeof container.websocketAdapter.close).toBe('function');
   });
 });

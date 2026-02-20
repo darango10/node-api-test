@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PurchaseCompletedEvent",
+  "description": "WebSocket message sent when a user successfully completes a stock purchase",
+  "type": "object",
+  "required": ["type", "userId", "symbol", "quantity", "success"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "purchase_completed",
+      "description": "Event type for client routing"
+    },
+    "userId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "User who performed the purchase"
+    },
+    "symbol": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stock symbol (e.g. AAPL)"
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of shares purchased"
+    },
+    "success": {
+      "type": "boolean",
+      "const": true,
+      "description": "Always true for this event"
+    },
+    "price": {
+      "type": "number",
+      "minimum": 0,
+      "exclusiveMinimum": true,
+      "description": "Execution price per share (optional)"
+    },
+    "total": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total cost quantity × price (optional)"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 server time when event was emitted (optional)"
+    }
+  },
+  "additionalProperties": false
+}
