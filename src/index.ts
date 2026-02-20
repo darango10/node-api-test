@@ -43,19 +43,24 @@ const startServer = async (): Promise<Server> => {
       logger.info(`🚀 Server listening on port ${config.PORT}`);
       logger.info(`🌍 Environment: ${config.NODE_ENV}`);
       logger.info(`📚 API Documentation: http://localhost:${config.PORT}/api-docs`);
+      logger.info(`🔌 WebSocket subscribe (events): ws://localhost:${config.PORT}/ws/events?userId=USER_ID`);
 
       // List all available endpoints
       logAvailableEndpoints(app);
     });
 
-    // Attach WebSocket server to HTTP server (path /ws?userId=...)
+    // Attach WebSocket server to HTTP server (path /ws/events?userId=...)
     container.websocketAdapter.attachToServer(server);
 
-    // Graceful shutdown
+    // Graceful shutdown: close WebSocket server and all client connections first, then HTTP server
     const shutdown = async (signal: string) => {
       logger.info(`${signal} received, starting graceful shutdown`);
 
-      container.websocketAdapter.close();
+      try {
+        await container.websocketAdapter.close();
+      } catch (err) {
+        logger.warn({ err }, 'Error closing WebSocket server (continuing shutdown)');
+      }
 
       server.close(async () => {
         logger.info('HTTP server closed');

@@ -71,7 +71,7 @@
 
 **Independent Test**: Trigger a purchase that fails (e.g. price out of tolerance); assert no purchase_completed event is received. Trigger a successful purchase; assert one event is received.
 
-- [ ] T011 [P] [US2] Integration test: failed purchase (e.g. price out of tolerance or vendor reject) does not emit purchase_completed event to connected client in tests/integration/websocket-purchase-event.spec.ts
+- [x] T011 [P] [US2] Integration test: failed purchase (e.g. price out of tolerance or vendor reject) does not emit purchase_completed event to connected client in tests/integration/websocket-purchase-event.spec.ts
 
 **Checkpoint**: User Story 2 verified — events only on success.
 
@@ -83,8 +83,8 @@
 
 **Independent Test**: Connect two clients as user A and user B; complete a purchase as user A only; assert only A’s client receives the purchase_completed event.
 
-- [ ] T012 [US3] Reject WebSocket connection when userId query param is missing or invalid; only register socket for that userId in src/features/shared/infrastructure/websocket/
-- [ ] T013 [US3] Integration test: connect as user A and user B; complete purchase as user A only; assert only A’s client receives purchase_completed in tests/integration/websocket-purchase-event.spec.ts
+- [x] T012 [US3] Reject WebSocket connection when userId query param is missing or invalid; only register socket for that userId in src/features/shared/infrastructure/websocket/
+- [x] T013 [US3] Integration test: connect as user A and user B; complete purchase as user A only; assert only A’s client receives purchase_completed in tests/integration/websocket-purchase-event.spec.ts
 
 **Checkpoint**: User Story 3 complete — event delivery scoped by userId.
 
@@ -94,9 +94,9 @@
 
 **Purpose**: Graceful shutdown, docs, and verification.
 
-- [ ] T014 Close WebSocket server and all client connections in graceful shutdown (before HTTP server.close) in src/index.ts
-- [ ] T015 [P] Update specs/004-websocket-stock-events/quickstart.md or project README with WebSocket endpoint URL and verification steps if not already complete
-- [ ] T016 Run full test suite (npm test) and ESLint (npm run lint); verify coverage ≥80% for new code paths
+- [x] T014 Close WebSocket server and all client connections in graceful shutdown (before HTTP server.close) in src/index.ts
+- [x] T015 [P] Update specs/004-websocket-stock-events/quickstart.md or project README with WebSocket endpoint URL and verification steps if not already complete
+- [x] T016 Run full test suite (npm test) and ESLint (npm run lint); verify coverage ≥80% for new code paths
 
 ---
 

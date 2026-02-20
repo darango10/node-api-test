@@ -7,7 +7,8 @@ import type {
 } from '../../ports/event-publisher.port';
 import { logger } from '../config/logger';
 
-const WS_PATH = '/ws';
+/** WebSocket path for subscribing to real-time events (pub/sub). */
+const WS_PATH = '/ws/events';
 
 /**
  * Parses userId from request URL query string (?userId=...).
@@ -87,7 +88,7 @@ export class WebSocketServerAdapter implements EventPublisherPort {
   }
 
   /**
-   * Attach to an HTTP server: handle upgrade on path /ws and associate connections with userId.
+   * Attach to an HTTP server: handle upgrade on path /ws/events and associate connections with userId.
    */
   attachToServer(server: Server): void {
     if (this.upgradeHandlerBound) return;
@@ -108,13 +109,26 @@ export class WebSocketServerAdapter implements EventPublisherPort {
   }
 
   /**
-   * Close all client connections and the WebSocket server.
+   * Close all client connections and the WebSocket server (graceful shutdown).
+   * Uses close code 1001 (Going away) so clients know the server is shutting down.
+   * Resolves when the WS server has fully closed. Call before closing the HTTP server.
    */
-  close(): void {
+  close(): Promise<void> {
+    const GOING_AWAY = 1001;
+    const reason = 'Server shutting down';
+
     for (const set of this.connectionsByUser.values()) {
-      for (const ws of set) ws.close();
+      for (const ws of set) {
+        if (ws.readyState === WebSocket.OPEN) ws.close(GOING_AWAY, reason);
+      }
     }
     this.connectionsByUser.clear();
-    this.wss.close();
+
+    return new Promise((resolve) => {
+      this.wss.close(() => {
+        logger.debug('WebSocket server closed');
+        resolve();
+      });
+    });
   }
 }
