@@ -155,11 +155,11 @@ describe('StockVendorAdapter Integration', () => {
 
   describe('getCurrentPrice', () => {
     describe('should return current price', () => {
-      it('when vendor returns valid price for symbol', async () => {
+      it('when vendor returns valid price for symbol on first page', async () => {
         // Arrange
         nock(vendorBaseUrl)
           .get('/stocks')
-          .query({ limit: 1000 })
+          .query({ limit: 100 })
           .matchHeader('x-api-key', testApiKey)
           .reply(200, {
             status: 200,
@@ -178,14 +178,49 @@ describe('StockVendorAdapter Integration', () => {
         // Assert
         expect(price).toBe(155.5);
       });
+
+      it('when symbol is on a later page (pagination)', async () => {
+        // Arrange: first page has no AAPL, second page has AAPL
+        nock(vendorBaseUrl)
+          .get('/stocks')
+          .query({ limit: 100 })
+          .matchHeader('x-api-key', testApiKey)
+          .reply(200, {
+            status: 200,
+            data: {
+              items: [
+                { symbol: 'MSFT', price: 400.0, name: 'Microsoft Corporation' },
+                { symbol: 'GOOGL', price: 2800.0, name: 'Alphabet Inc.' },
+              ],
+              nextToken: 'page2',
+            },
+          });
+        nock(vendorBaseUrl)
+          .get('/stocks')
+          .query({ limit: 100, nextToken: 'page2' })
+          .matchHeader('x-api-key', testApiKey)
+          .reply(200, {
+            status: 200,
+            data: {
+              items: [{ symbol: 'AAPL', price: 175.25, name: 'Apple Inc.' }],
+              nextToken: null,
+            },
+          });
+
+        // Act
+        const price = await adapter.getCurrentPrice('AAPL');
+
+        // Assert
+        expect(price).toBe(175.25);
+      });
     });
 
     describe('should throw error', () => {
-      it('when symbol is not found', async () => {
+      it('when symbol is not found on any page', async () => {
         // Arrange
         nock(vendorBaseUrl)
           .get('/stocks')
-          .query({ limit: 1000 })
+          .query({ limit: 100 })
           .matchHeader('x-api-key', testApiKey)
           .reply(200, {
             status: 200,
@@ -205,7 +240,7 @@ describe('StockVendorAdapter Integration', () => {
         // Arrange
         nock(vendorBaseUrl)
           .get('/stocks')
-          .query({ limit: 1000 })
+          .query({ limit: 100 })
           .matchHeader('x-api-key', testApiKey)
           .reply(500, {
             status: 500,

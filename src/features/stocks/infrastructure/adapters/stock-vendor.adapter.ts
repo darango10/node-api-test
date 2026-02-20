@@ -151,6 +151,7 @@ export class StockVendorAdapter implements StockVendorPort {
 
   /**
    * Get current price for a specific stock symbol
+   * Paginates through vendor /stocks until the symbol is found (vendor has no per-symbol price endpoint).
    * @param symbol - Stock symbol
    * @returns Current price
    * @throws Error if vendor is unavailable or symbol not found
@@ -159,48 +160,61 @@ export class StockVendorAdapter implements StockVendorPort {
     try {
       logger.info({ symbol }, 'Fetching current price from vendor');
 
-      // Fetch all stocks and find the specific symbol
-      // The vendor API doesn't have a separate price endpoint
-      const response = await this.client.get('/stocks', {
-        params: { limit: 1000 }, // Get all stocks to search for the symbol
-      });
+      const pageLimit = 100;
+      const maxPages = 100;
+      let currentToken: string | undefined;
+      let pageCount = 0;
 
-      // Log vendor response
-      logger.debug(
-        {
-          symbol,
-          statusCode: response.status,
-          totalStocks: response.data?.data?.items?.length || 0,
-        },
-        'Vendor response received for getCurrentPrice'
-      );
+      // Paginate through vendor pages until we find the symbol
+      do {
+        pageCount++;
+        if (pageCount > maxPages) {
+          logger.warn({ symbol, pageCount }, 'Reached max pages while searching for symbol');
+          break;
+        }
 
-      // Validate response structure
-      if (!response.data?.data?.items || !Array.isArray(response.data.data.items)) {
-        logger.error(
-          { symbol, responseData: response.data },
-          'Invalid response format from vendor for getCurrentPrice'
+        const params: Record<string, string | number> = { limit: pageLimit };
+        if (currentToken) {
+          params.nextToken = currentToken;
+        }
+
+        const response = await this.client.get('/stocks', { params });
+
+        logger.debug(
+          {
+            symbol,
+            page: pageCount,
+            statusCode: response.status,
+            itemsCount: response.data?.data?.items?.length || 0,
+          },
+          'Vendor response received for getCurrentPrice'
         );
-        throw new Error('Invalid response format from vendor');
-      }
 
-      // Find the stock by symbol
-      const stock = response.data.data.items.find(
-        (item: { symbol: string; price: number }) =>
-          item.symbol.toUpperCase() === symbol.toUpperCase()
-      );
+        if (!response.data?.data?.items || !Array.isArray(response.data.data.items)) {
+          logger.error(
+            { symbol, responseData: response.data },
+            'Invalid response format from vendor for getCurrentPrice'
+          );
+          throw new Error('Invalid response format from vendor');
+        }
 
-      if (!stock) {
-        throw new Error(`Stock symbol ${symbol} not found`);
-      }
+        const stock = response.data.data.items.find(
+          (item: { symbol: string; price: number }) =>
+            item.symbol.toUpperCase() === symbol.toUpperCase()
+        );
 
-      if (typeof stock.price !== 'number') {
-        throw new Error('Invalid price response from vendor');
-      }
+        if (stock) {
+          if (typeof stock.price !== 'number') {
+            throw new Error('Invalid price response from vendor');
+          }
+          logger.info({ symbol, price: stock.price, page: pageCount }, 'Price fetched successfully');
+          return stock.price;
+        }
 
-      logger.info({ symbol, price: stock.price }, 'Price fetched successfully');
+        currentToken = response.data.data.nextToken;
+      } while (currentToken);
 
-      return stock.price;
+      throw new Error(`Stock symbol ${symbol} not found`);
     } catch (error: unknown) {
       const err = error as Error;
 
