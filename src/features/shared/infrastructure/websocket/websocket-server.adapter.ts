@@ -101,7 +101,7 @@ export class WebSocketServerAdapter implements EventPublisherPort {
         return;
       }
 
-      this.wss.handleUpgrade(request, socket, head, (ws) => {
+      this.wss.handleUpgrade(request, socket, head, (ws: WebSocket) => {
         this.wss.emit('connection', ws, request);
       });
     });

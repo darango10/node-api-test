@@ -52,3 +52,64 @@
    ```
 
 4. Confirm the WS client receives one message with `type: "purchase_completed"`, `userId: "user123"`, `symbol: "AAPL"`, `quantity: 1`, `success: true`.
+
+---
+
+## Try it with Docker and Postman
+
+### 1. Run the API with Docker
+
+From the project root, ensure you have a `.env` with at least `VENDOR_API_URL` and `VENDOR_API_KEY` (for the stock vendor; use a stub URL if you only care about the WebSocket):
+
+```bash
+docker compose up --build
+```
+
+Wait until the app is healthy (logs show "Server listening on port 3000"). The API and WebSocket are available at:
+
+- **HTTP**: `http://localhost:3000`
+- **WebSocket**: `ws://localhost:3000/ws?userId=USER_ID`
+
+### 2. Connect with Postman (WebSocket)
+
+1. **New WebSocket request**
+   - In Postman: **New** → **WebSocket Request** (or use the **WebSocket** tab in a request).
+
+2. **Enter URL**
+   - URL: `ws://localhost:3000/ws?userId=user123`  
+   - The `userId` query param is required so the server can scope events to that user.
+
+3. **Connect**
+   - Click **Connect**. Postman shows "Connected" and a log of messages.
+
+4. **Trigger a purchase (HTTP)**
+   - In another Postman tab (or any HTTP client):
+     - Method: **POST**
+     - URL: `http://localhost:3000/users/user123/purchases`
+     - Headers: `Content-Type: application/json`
+     - Body (raw JSON):
+       ```json
+       { "symbol": "AAPL", "quantity": 1, "price": 150 }
+       ```
+   - Send the request. The purchase must succeed (vendor and price within tolerance) for an event to be emitted.
+
+5. **See the event in the WebSocket tab**
+   - Back in the WebSocket request tab you should see one message, for example:
+     ```json
+     {
+       "type": "purchase_completed",
+       "userId": "user123",
+       "symbol": "AAPL",
+       "quantity": 1,
+       "success": true,
+       "price": 150,
+       "total": 150,
+       "timestamp": "2025-02-19T..."
+     }
+     ```
+
+### 3. Notes
+
+- **Vendor API**: If `VENDOR_API_URL` / `VENDOR_API_KEY` are missing or wrong, `/stocks` and purchase may fail. Use a mock vendor or set them in `.env` for real calls.
+- **Same userId**: The WebSocket `?userId=user123` must match the user in the purchase path `/users/user123/purchases` for that connection to receive the event.
+- **WS only on 3000**: Both HTTP and WebSocket use the same port (3000); Postman uses `ws://` for the WebSocket and `http://` for the POST.
