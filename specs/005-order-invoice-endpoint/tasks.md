@@ -25,8 +25,8 @@
 
 **Purpose**: Create invoicing vertical slice structure and config; project (Node, Express, Vitest) already exists.
 
-- [ ] T001 Create invoicing feature slice structure (domain/entities, domain/services, domain/errors, application/use-cases, infrastructure/controllers, infrastructure/routes, infrastructure/adapters, ports/services) in src/features/invoicing/
-- [ ] T002 Add invoicing environment variables to config schema (ORDER_STATUS_WEBHOOK_TOKEN, VTEX_APP_KEY, VTEX_APP_TOKEN, VTEX_ACCOUNT_NAME, VTEX_ENVIRONMENT, INVOICE_TARGET_ORDER_STATUS, optional INVOICE_DLQ_PATH, INVOICE_ASYNC_THRESHOLD_MS) in src/features/shared/infrastructure/config/ or new src/features/invoicing/infrastructure/config/
+- [x] T001 Create invoicing feature slice structure (domain/entities, domain/services, domain/errors, application/use-cases, infrastructure/controllers, infrastructure/routes, infrastructure/adapters, ports/services) in src/features/invoicing/
+- [x] T002 Add invoicing environment variables to config schema (ORDER_STATUS_WEBHOOK_TOKEN, VTEX_APP_KEY, VTEX_APP_TOKEN, VTEX_ACCOUNT_NAME, VTEX_ENVIRONMENT, INVOICE_TARGET_ORDER_STATUS, optional INVOICE_DLQ_PATH, INVOICE_ASYNC_THRESHOLD_MS) in src/features/shared/infrastructure/config/ or new src/features/invoicing/infrastructure/config/
 
 ---
 
@@ -36,9 +36,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T003 [P] Define VtexInvoicePort interface (submitInvoice(orderId, body)) in src/features/invoicing/ports/services/vtex-invoice.port.ts
-- [ ] T004 [P] Define SecretsPort interface (getVtexCredentials()) in src/features/invoicing/ports/services/secrets.port.ts
-- [ ] T005 [P] Define DLQPort interface (sendFailedPayload(payload, metadata)) in src/features/invoicing/ports/services/dlq.port.ts
+- [x] T003 [P] Define VtexInvoicePort interface (submitInvoice(orderId, body)) in src/features/invoicing/ports/services/vtex-invoice.port.ts
+- [x] T004 [P] Define SecretsPort interface (getVtexCredentials()) in src/features/invoicing/ports/services/secrets.port.ts
+- [x] T005 [P] Define DLQPort interface (sendFailedPayload(payload, metadata)) in src/features/invoicing/ports/services/dlq.port.ts
 
 **Checkpoint**: Ports defined; US1, US2, US3 can proceed
 

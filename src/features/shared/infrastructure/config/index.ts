@@ -14,6 +14,19 @@ const configSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().email().optional(),
+  // Invoicing (order status webhook → VTEX invoice)
+  ORDER_STATUS_WEBHOOK_TOKEN: z.string().min(1).optional(),
+  VTEX_APP_KEY: z.string().optional(),
+  VTEX_APP_TOKEN: z.string().optional(),
+  VTEX_ACCOUNT_NAME: z.string().optional(),
+  VTEX_ENVIRONMENT: z.string().optional(),
+  INVOICE_TARGET_ORDER_STATUS: z.string().min(1).optional(),
+  INVOICE_DLQ_PATH: z.string().optional(),
+  INVOICE_ASYNC_THRESHOLD_MS: z
+    .string()
+    .transform(Number)
+    .pipe(z.number().int().positive())
+    .optional(),
 });
 
 export type Config = z.infer<typeof configSchema>;
