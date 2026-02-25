@@ -1,0 +1,129 @@
+# Contract: Order Status Webhook (Inbound)
+# POST /api/v1/webhooks/orders/status
+# Branch: 005-order-invoice-endpoint
+
+openapi: 3.0.3
+info:
+  title: Order Invoice Webhook API
+  description: Inbound webhook for order status updates (triggers VTEX invoice when status matches).
+  version: 1.0.0
+
+paths:
+  /api/v1/webhooks/orders/status:
+    post:
+      summary: Submit order status update
+      description: |
+        Receives order status update from ERP/WMS/Logistics. If orderStatus is one of the configured target
+        statuses (e.g. PREPARING_SHIPPING or DELIVERED), the system validates, transforms, and triggers the VTEX invoice API.
+        Otherwise returns 200 and does not call VTEX.
+      operationId: postOrderStatus
+      tags:
+        - Webhooks
+      security:
+        - BearerAuth: []
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderStatusUpdate'
+            example:
+              orderId: "1613140529899-01"
+              orderStatus: "PREPARING_SHIPPING"
+              items:
+                - id: "1023"
+                  price: 150.00
+                  quantity: 2
+                  description: "Wireless Noise-Canceling Headphones"
+      responses:
+        '200':
+          description: Request accepted and processed (invoice triggered, or status did not match and no VTEX call).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  message: { type: string, example: "Order status received." }
+        '202':
+          description: Accepted; processing will continue asynchronously (when async threshold is enabled).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  message: { type: string, example: "Accepted for processing." }
+        '400':
+          description: Invalid payload (e.g. missing orderId, empty items).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Missing or invalid authorization (Bearer token or API key).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Too many requests (rate limit).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    OrderStatusUpdate:
+      type: object
+      required:
+        - orderId
+        - orderStatus
+        - items
+      properties:
+        orderId:
+          type: string
+          minLength: 1
+          description: Order identifier (e.g. VTEX order ID).
+        orderStatus:
+          type: string
+          description: Current order status; invoice is triggered only when this is one of the configured target statuses (e.g. PREPARING_SHIPPING or DELIVERED).
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/OrderStatusLineItem'
+    OrderStatusLineItem:
+      type: object
+      required:
+        - id
+        - price
+        - quantity
+        - description
+      properties:
+        id:
+          type: string
+        price:
+          type: number
+          description: Unit price (decimal e.g. 150.00 or already in cents).
+        quantity:
+          type: integer
+          minimum: 1
+        description:
+          type: string
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        code: { type: string }
